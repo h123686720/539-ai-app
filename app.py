@@ -56,18 +56,19 @@ elif st.session_state["step"] == "countdown":
     st.session_state["step"] = "result"; st.rerun()
 
 elif st.session_state["step"] == "result":
-    st.markdown(f"## 今日 AI 推算結果")
+    # --- 這裡已經修改：動態顯示當前日期 ---
+    today_date = datetime.now().strftime('%Y/%m/%d')
+    st.markdown(f"## 今日預測 {today_date}")
     st.markdown(f"<div class='history-text'>📡 系統已偵測最新獎號並完成 AI 推算</div>", unsafe_allow_html=True)
 
-    # --- 手動讀取 CSV 邏輯 ---
+    # --- 讀取 CSV 邏輯 ---
     try:
         df = pd.read_csv('history539.csv')
-        # 抓取 CSV 第一行的號碼
         h_nums = [str(df.iloc[0][c]).zfill(2) for c in ['n1', 'n2', 'n3', 'n4', 'n5']]
     except:
-        h_nums = ["01", "02", "03", "04", "05"] # 讀取失敗時的保底號碼
+        h_nums = ["01", "02", "03", "04", "05"]
 
-    # 以日期為種子，確保當天號碼固定，且避開 CSV 裡的號碼
+    # 以日期為隨機種子，確保當天號碼固定
     random.seed(int(datetime.now().strftime("%Y%m%d")))
     pool = [str(i).zfill(2) for i in range(1, 40) if str(i).zfill(2) not in h_nums]
     all_picks = sorted(random.sample(pool, 6))
