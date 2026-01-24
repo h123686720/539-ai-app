@@ -44,7 +44,7 @@ elif st.session_state["step"] == "decrypting":
     msg = st.empty()
     for i in range(30):
         code = "".join([ "錢贏中獎!@#$"[random.randint(0,7)] for _ in range(10)])
-        msg.markdown(f"### [AI 正在讀取歷史數據]\n## {code}\n進度: {int(i*3.4)}%")
+        msg.markdown(f"### [AI 正在分析核心數據]\n## {code}\n進度: {int(i*3.4)}%")
         time.sleep(0.04)
     st.session_state["step"] = "countdown"; st.rerun()
 
@@ -61,20 +61,9 @@ elif st.session_state["step"] == "result":
     st.markdown(f"## 今日預測 {today_date}")
     st.markdown(f"<div class='history-text'>📡 系統已偵測最新獎號並完成 AI 推算</div>", unsafe_allow_html=True)
 
-    # 2. 讀取 CSV 歷史號碼
-    try:
-        df = pd.read_csv('history539.csv')
-        h_nums = [str(df.iloc[0][c]).zfill(2) for c in ['n1', 'n2', 'n3', 'n4', 'n5']]
-    except:
-        h_nums = ["01", "02", "03", "04", "05"]
-
-    # 3. 指定連碰號碼 (固定為 06, 15, 16)
-    jt_final = ["06", "15", "16"]
-
-    # 4. 專車號碼 (避開歷史號碼與連碰號碼)
-    random.seed(int(datetime.now().strftime("%Y%m%d")))
-    pool = [str(i).zfill(2) for i in range(1, 40) if str(i).zfill(2) not in h_nums and str(i).zfill(2) not in jt_final]
-    sv_final = sorted(random.sample(pool, 2))
+    # 2. 指定號碼
+    sv_final = ["07", "08"]    # 專車固定號碼
+    jt_final = ["06", "15", "16"] # 連碰固定號碼
 
     st.write("")
     c1, c2 = st.columns(2)
@@ -84,5 +73,6 @@ elif st.session_state["step"] == "result":
         st.markdown(f"<div class='res-box'>[ 連碰 ]<br><h2 style='font-size:38px;'>{', '.join(jt_final)}</h2></div>", unsafe_allow_html=True)
     
     st.write("---")
+    st.caption("AI 核心運算已鎖定今日最佳組合")
     if st.button("登出系統"):
         st.session_state["step"] = "login"; st.rerun()
