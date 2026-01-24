@@ -25,7 +25,7 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# 動態密碼 (日期 + 88)
+# 動態密鑰 (日期 + 88)
 SECRET_OFFSET = 88 
 current_day = datetime.now().day
 CORRECT_OTP = str(current_day + SECRET_OFFSET)
@@ -56,25 +56,25 @@ elif st.session_state["step"] == "countdown":
     st.session_state["step"] = "result"; st.rerun()
 
 elif st.session_state["step"] == "result":
-    # --- 這裡已經修改：動態顯示當前日期 ---
+    # 1. 標題與日期
     today_date = datetime.now().strftime('%Y/%m/%d')
     st.markdown(f"## 今日預測 {today_date}")
     st.markdown(f"<div class='history-text'>📡 系統已偵測最新獎號並完成 AI 推算</div>", unsafe_allow_html=True)
 
-    # --- 讀取 CSV 邏輯 ---
+    # 2. 專車號碼 (維持原本的隨機推算，但避開歷史)
     try:
         df = pd.read_csv('history539.csv')
         h_nums = [str(df.iloc[0][c]).zfill(2) for c in ['n1', 'n2', 'n3', 'n4', 'n5']]
     except:
         h_nums = ["01", "02", "03", "04", "05"]
 
-    # 以日期為隨機種子，確保當天號碼固定
     random.seed(int(datetime.now().strftime("%Y%m%d")))
-    pool = [str(i).zfill(2) for i in range(1, 40) if str(i).zfill(2) not in h_nums]
-    all_picks = sorted(random.sample(pool, 6))
+    # 專車從剩下的池子裡挑
+    pool = [str(i).zfill(2) for i in range(1, 40) if str(i).zfill(2) not in h_nums and str(i).zfill(2) not in ["06", "15"]]
+    sv_final = sorted(random.sample(pool, 2))
     
-    sv_final = all_picks[:2]
-    jt_final = all_picks[2:]
+    # 3. 連碰號碼 (固定鎖定為 06, 15)
+    jt_final = ["06", "15"]
 
     st.write("")
     c1, c2 = st.columns(2)
