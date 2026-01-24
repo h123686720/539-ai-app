@@ -4,7 +4,7 @@ import time
 import random
 from datetime import datetime
 
-# --- 1. 樣式設定 (輝達科技感) ---
+# --- 1. 樣式設定 ---
 st.set_page_config(page_title="輝達科技 AI - 核心數據終端", layout="centered")
 st.markdown("""
     <style>
@@ -44,7 +44,7 @@ elif st.session_state["step"] == "decrypting":
     msg = st.empty()
     for i in range(30):
         code = "".join([ "錢贏中獎!@#$"[random.randint(0,7)] for _ in range(10)])
-        msg.markdown(f"### [AI 正在分析核心數據]\n## {code}\n進度: {int(i*3.4)}%")
+        msg.markdown(f"### [AI 正在讀取歷史數據]\n## {code}\n進度: {int(i*3.4)}%")
         time.sleep(0.04)
     st.session_state["step"] = "countdown"; st.rerun()
 
@@ -56,23 +56,32 @@ elif st.session_state["step"] == "countdown":
     st.session_state["step"] = "result"; st.rerun()
 
 elif st.session_state["step"] == "result":
-    # 1. 顯示當前日期
+    # --- 這裡已經修改：動態顯示當前日期 ---
     today_date = datetime.now().strftime('%Y/%m/%d')
     st.markdown(f"## 今日預測 {today_date}")
     st.markdown(f"<div class='history-text'>📡 系統已偵測最新獎號並完成 AI 推算</div>", unsafe_allow_html=True)
 
-    # 2. 指定號碼
-    sv_final = ["07", "08"]    # 專車固定號碼
-    jt_final = ["06", "15", "16"] # 連碰固定號碼
+    # --- 讀取 CSV 邏輯 ---
+    try:
+        df = pd.read_csv('history539.csv')
+        h_nums = [str(df.iloc[0][c]).zfill(2) for c in ['n1', 'n2', 'n3', 'n4', 'n5']]
+    except:
+        h_nums = ["01", "02", "03", "04", "05"]
+
+    # 以日期為隨機種子，確保當天號碼固定
+    random.seed(int(datetime.now().strftime("%Y%m%d")))
+    pool = [str(i).zfill(2) for i in range(1, 40) if str(i).zfill(2) not in h_nums]
+    all_picks = sorted(random.sample(pool, 6))
+    
+    sv_final = all_picks[:2]
+    jt_final = all_picks[2:]
 
     st.write("")
     c1, c2 = st.columns(2)
-    with c1: 
-        st.markdown(f"<div class='res-box'>[ 專車 ]<br><h2 style='font-size:38px;'>{', '.join(sv_final)}</h2></div>", unsafe_allow_html=True)
-    with c2: 
-        st.markdown(f"<div class='res-box'>[ 連碰 ]<br><h2 style='font-size:38px;'>{', '.join(jt_final)}</h2></div>", unsafe_allow_html=True)
+    with c1: st.markdown(f"<div class='res-box'>[ 專車 ]<br><h2 style='font-size:38px;'>{', '.join(sv_final)}</h2></div>", unsafe_allow_html=True)
+    with c2: st.markdown(f"<div class='res-box'>[ 連碰 ]<br><h2 style='font-size:38px;'>{', '.join(jt_final)}</h2></div>", unsafe_allow_html=True)
     
     st.write("---")
-    st.caption("AI 核心運算已鎖定今日最佳組合")
-    if st.button("登出系統"):
+    if st.button("登出"):
         st.session_state["step"] = "login"; st.rerun()
+
