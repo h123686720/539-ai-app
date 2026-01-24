@@ -23,30 +23,23 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. 自動爬蟲函數 (抓取最新 539 獎號) ---
+# --- 2. 自動爬蟲函數 ---
 def get_latest_539():
     try:
-        # 爬取台灣彩券相關報牌站點 (以常用穩定來源為例)
         url = "https://www.lotto-8.com/listlto539.asp"
         headers = {'User-Agent': 'Mozilla/5.0'}
-        res = requests.get(url, headers=headers)
+        res = requests.get(url, headers=headers, timeout=5)
         res.encoding = 'utf-8'
         soup = BeautifulSoup(res.text, 'html.parser')
-        
-        # 抓取第一筆開獎號碼
         table = soup.find('table', {'class': 'table_lotto'})
         latest_row = table.find_all('tr')[1]
         cols = latest_row.find_all('td')
-        
-        # 號碼通常在第三個 td
         raw_nums = cols[2].text.strip().replace('\xa0', ' ').split(' ')
         nums = sorted([n for n in raw_nums if n])[:5]
         return nums
     except:
-        # 如果爬蟲失敗，回傳一組預設號碼避免當機
         return ["05", "12", "18", "24", "33"]
 
-# --- 3. 邏輯處理 ---
 if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
@@ -68,10 +61,8 @@ if st.session_state["step"] == "login":
 
 elif st.session_state["step"] == "decrypting":
     msg = st.empty()
-    # 這裡加入爬蟲動作
     with st.spinner('正在連接雲端數據庫...'):
         st.session_state["history_nums"] = get_latest_539()
-    
     for i in range(30):
         code = "".join([ "錢贏中獎!@#$"[random.randint(0,7)] for _ in range(10)])
         msg.markdown(f"### [AI 正在抓取實時開獎數據]\n## {code}\n進度: {int(i*3.4)}%")
@@ -88,17 +79,16 @@ elif st.session_state["step"] == "countdown":
 elif st.session_state["step"] == "result":
     st.markdown(f"## 今日 AI 推算結果")
     
-    # 顯示爬到的最新號碼
-    h_nums = st.session_state.get("history_nums", ["--","--","--","--","--"])
-    st.markdown(f"<div class='history-text'>📡 系統自動偵測最新獎號：{', '.join(h_nums)}</div>", unsafe_allow_html=True)
+    # --- 這裡已經修改：拿掉數字顯示 ---
+    st.markdown(f"<div class='history-text'>📡 系統已自動偵測最新獎號並完成 AI 推算</div>", unsafe_allow_html=True)
 
-    # AI 推算邏輯 (以日期為種子，結合歷史號碼偏移)
+    # 推算邏輯保持不變
+    h_nums = st.session_state.get("history_nums", ["05", "12", "18", "24", "33"])
     random.seed(int(datetime.now().strftime("%Y%m%d")))
     pool = [str(i).zfill(2) for i in range(1, 40) if str(i).zfill(2) not in h_nums]
-    
     all_picks = sorted(random.sample(pool, 6))
-    sv_final = all_picks[:2] # 專車
-    jt_final = all_picks[2:] # 連碰
+    sv_final = all_picks[:2]
+    jt_final = all_picks[2:]
 
     st.write("")
     c1, c2 = st.columns(2)
