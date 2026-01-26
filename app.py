@@ -4,7 +4,7 @@ import time
 import random
 from datetime import datetime
 
-# --- 1. 樣式設定 (輝達科技感) ---
+# --- 1. 樣式設定 ---
 st.set_page_config(page_title="輝達科技 AI - 數據終端", layout="centered")
 st.markdown("""
     <style>
@@ -26,14 +26,14 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# 動態密碼 (日期 + 88)
+# 動態密碼
 SECRET_OFFSET = 88 
 current_day = datetime.now().day
 CORRECT_OTP = str(current_day + SECRET_OFFSET)
 
 if st.session_state["step"] == "login":
     st.markdown("### 🔐 數據訪問驗證")
-    st.write(f"請獲取今日 [ {datetime.now().strftime('%d')}日 ] 臨時授權碼")
+    st.write(f"請獲取今日 [ {datetime.now().strftime('%d')}日 ] 臨時授權碼碼")
     pwd = st.text_input("ENTER OTP", type="password", label_visibility="collapsed")
     if st.button("啟動身份驗證"):
         if pwd == CORRECT_OTP:
@@ -43,23 +43,22 @@ if st.session_state["step"] == "login":
 
 elif st.session_state["step"] == "decrypting":
     msg = st.empty()
-    # 更豐富的駭客字元集
     chars = "0123456789ABCDEF!@#$%^&*()_+<>?|/[]{}\u4e00\u9fa5" 
     
     for i in range(101):
-        # 產生 6 行長短不一的亂碼
+        # 產生 6 行亂碼
         lines = []
         for _ in range(6):
             length = random.randint(20, 35)
             lines.append("".join([random.choice(chars) for _ in range(length)]))
         
-        # 組合 HTML 字串來顯示這 6 行
         code_html = "".join([f"<div class='code-style'>{line}</div>" for line in lines])
         
+        # --- 格式調換：亂碼在上，標題與進度在下 ---
         msg.markdown(f"""
-            ### [AI 核心數據提取中...]
             {code_html}
             <br>
+            ### [AI 核心數據提取中...]
             **系統進度: {i}%**
         """, unsafe_allow_html=True)
         
@@ -78,6 +77,7 @@ elif st.session_state["step"] == "result":
     st.markdown(f"## 今日預測 {today_date}")
     st.markdown(f"<div class='history-text'>📡 系統已偵測最新獎號並完成 AI 推算</div>", unsafe_allow_html=True)
 
+    # 您的固定號碼
     sv_final = ["07", "08"]    
     jt_final = ["06", "15", "16"] 
 
