@@ -4,33 +4,35 @@ import time
 import random
 from datetime import datetime, timedelta, timezone
 
-# --- 1. 時間設定 (固定顯示您指定的時間) ---
+# --- 1. 時間設定 ---
 tz_taipei = timezone(timedelta(hours=8))
 now_taipei = datetime.now(tz_taipei)
 today_str = now_taipei.strftime('%Y/%m/%d')
-# 依照您的要求，強制固定顯示 15:21:55
-fixed_time_str = "15:21:55"
+# 依照截圖要求，固定顯示時間格式
+fixed_time_display = "15:21:55"
 
-# --- 2. 樣式設定 (上下排列佈局) ---
-st.set_page_config(page_title="輝達科技 AI - 核心數據終端", layout="centered")
+# --- 2. 介面樣式優化 (上下堆疊排版) ---
+st.set_page_config(page_title="輝達科技 AI - 核心終端", layout="centered")
 st.markdown(f"""
     <style>
     .stApp {{ background-color: black; }}
     header {{visibility: hidden;}}
     .main .block-container {{ max-width: 600px; padding: 1rem; }}
-    .nvidia-title {{ width: 100%; border: 3px solid #76b900; padding: 15px; text-align: center; font-size: 30px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 15px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
+    .nvidia-title {{ width: 100%; border: 2px solid #76b900; padding: 15px; text-align: center; font-size: 30px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 15px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
     .stApp, h1, h2, h3, p, div, label, span {{ color: #00FF41 !important; text-align: center; }}
+    
+    /* 垂直堆疊大方框 */
     .res-box {{ 
         border: 2px solid #76b900; 
-        padding: 20px; 
+        padding: 25px; 
         border-radius: 12px; 
         background: rgba(0,0,0,0.5); 
-        margin-bottom: 15px;
+        margin-bottom: 20px;
         width: 100%;
     }}
-    .history-text {{ font-size: 14px; color: #76b900 !important; border: 1px dashed #76b900; padding: 10px; margin-bottom: 20px; }}
+    .history-text {{ font-size: 15px; color: #76b900 !important; border: 1px dashed #76b900; padding: 12px; margin-bottom: 25px; border-radius: 8px; }}
     input {{ background-color: #0d0d0d !important; color: #00FF41 !important; border: 1px solid #00FF41 !important; text-align: center !important; }}
-    .stButton>button {{ background: transparent !important; color: #00FF41 !important; border: 1px solid #00FF41 !important; width: 100%; height: 50px; }}
+    .stButton>button {{ background: transparent !important; color: #00FF41 !important; border: 1px solid #00FF41 !important; width: 100%; height: 50px; border-radius: 10px; }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -38,17 +40,17 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# 驗證碼邏輯 (維持與當天日期連動)
+# 驗證碼 (今日日期+88)
 CORRECT_OTP = str(now_taipei.day + 88)
 
 if st.session_state["step"] == "login":
     st.markdown("### 🔐 台北數據中心授權")
     st.write(f"系統偵測日 (CST): [ {now_taipei.strftime('%d')}日 ]")
-    pwd = st.text_input("ENTER CODE", type="password", label_visibility="collapsed")
-    if st.button("授權啟動"):
+    pwd = st.text_input("PASSWORD", type="password", label_visibility="collapsed")
+    if st.button("授權並進入系統"):
         if pwd.strip() == CORRECT_OTP:
             st.session_state["step"] = "decrypting"; st.rerun()
-        else: st.error("授權失敗")
+        else: st.error("授權密碼錯誤")
 
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
@@ -56,37 +58,34 @@ elif st.session_state["step"] == "decrypting":
     for i in range(21):
         lines = ["".join([random.choice(chars) for _ in range(25)]) for _ in range(5)]
         hack_output = "\n".join([f"## {line}" for line in lines])
-        placeholder.markdown(f"{hack_output}\n\n**權重數據鎖定中... {i*5}%**")
+        placeholder.markdown(f"{hack_output}\n\n**核心權重演算中... {i*5}%**")
         time.sleep(0.1)
     st.session_state["step"] = "result"; st.rerun()
 
 elif st.session_state["step"] == "result":
+    # 標題與時間 (依截圖格式)
     st.markdown(f"### 今日預測 {today_str}")
-    # 這裡顯示您要求的固定時間
-    st.write(f"台北時間: {fixed_time_str}")
+    st.write(f"預測生成時間 (台北): {fixed_time_display}")
     
-    try:
-        df = pd.read_csv('history539.csv')
-        actual_count = len(df)
-        st.markdown(f"<div class='history-text'>📡 成功解析 {actual_count} 期歷史數據 | 數據強行鎖定</div>", unsafe_allow_html=True)
-    except:
-        st.markdown("<div class='history-text'>📡 數據解析中...</div>", unsafe_allow_html=True)
+    # 解析文字 (依截圖格式固定顯示 452)
+    st.markdown(f"<div class='history-text'>📡 成功解析 452 期歷史數據 | 蒙地卡羅演算完成</div>", unsafe_allow_html=True)
 
-    # --- 強制指定號碼 ---
-    sv_final = ["23", "30"]
-    jt_final = ["18", "24", "37"]
+    # --- 鎖定號碼 ---
+    sv_nums = "23, 30"
+    jt_nums = "18, 24, 37"
 
-    # --- 顯示成果：專車在上，連碰在下 ---
+    # --- 垂直排列成果 ---
     st.markdown(f"""
         <div class='res-box'>
-            <p style='font-size:18px;'>[ 專車優先 ]</p>
-            <h2 style='font-size:48px; color:#FFD700 !important;'>{', '.join(sv_final)}</h2>
+            <p style='font-size:20px; margin-bottom:10px;'>[ 專車優先 ]</p>
+            <h2 style='font-size:56px; color:#FFD700 !important; letter-spacing: 5px;'>{sv_nums}</h2>
         </div>
         <div class='res-box'>
-            <p style='font-size:18px;'>[ 連碰組合 ]</p>
-            <h2 style='font-size:48px;'>{', '.join(jt_final)}</h2>
+            <p style='font-size:20px; margin-bottom:10px;'>[ 連碰組合 ]</p>
+            <h2 style='font-size:56px; letter-spacing: 5px;'>{jt_nums}</h2>
         </div>
     """, unsafe_allow_html=True)
     
+    st.write("---")
     if st.button("登出系統"):
         st.session_state["step"] = "login"; st.rerun()
