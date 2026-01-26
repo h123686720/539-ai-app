@@ -27,7 +27,7 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# 動態密碼 (日期 + 88)
+# 動態密碼
 SECRET_OFFSET = 88 
 current_day = datetime.now().day
 CORRECT_OTP = str(current_day + SECRET_OFFSET)
@@ -48,7 +48,8 @@ elif st.session_state["step"] == "decrypting":
     
     for i in range(101):
         lines = ["".join([random.choice(chars) for _ in range(random.randint(25, 35))]) for _ in range(6)]
-        code_html = "".join([f<div class='code-style'>{line}</div> for line in lines])
+        # 這裡已修正引號語法
+        code_html = "".join([f'<div class="code-style">{line}</div>' for line in lines])
         current_algo = algo_steps[min(i // 17, 5)]
         msg.markdown(f"{code_html}<br>### [{current_algo}]<br>**深度演算進度: {i}%**", unsafe_allow_html=True)
         time.sleep(0.04)
@@ -65,45 +66,37 @@ elif st.session_state["step"] == "result":
     today_date = datetime.now().strftime('%Y/%m/%d')
     st.markdown(f"## 今日預測 {today_date}")
     
-    # --- 核心大數據推算法 ---
     try:
-        # 強制指定 Header，確保 453 期數據全部讀入
         df = pd.read_csv('history539.csv')
+        # 直接使用數據總長度
         actual_count = len(df)
         st.markdown(f"<div class='history-text'>📡 成功解析 {actual_count} 期歷史數據 | 蒙地卡羅演算完成</div>", unsafe_allow_html=True)
         
-        # 1. 計算所有號碼的出現頻率 (熱度)
         all_nums = df[['n1', 'n2', 'n3', 'n4', 'n5']].values.flatten()
         freq = pd.Series(all_nums).value_counts(normalize=True)
-        
-        # 2. 初始權重
         weights = np.array([freq.get(i, 0.02) for i in range(1, 40)])
         
-        # 3. 排除法：降低昨日獎號權重
+        # 排除昨日
         last_nums = df.iloc[0][['n1', 'n2', 'n3', 'n4', 'n5']].values
-        for n in last_nums: weights[int(n)-1] *= 0.1  # 大幅降低避免重複
+        for n in last_nums: weights[int(n)-1] *= 0.1
         
-        # 4. 跳號法：增加「隔兩期」開出號碼的權重 (模擬常見跳號)
+        # 隔兩期跳號權重
         if actual_count > 2:
             skip_nums = df.iloc[2][['n1', 'n2', 'n3', 'n4', 'n5']].values
             for n in skip_nums: weights[int(n)-1] *= 1.5
-
-    except Exception as e:
+    except:
         weights = np.ones(39) / 39
-        st.warning(f"數據對齊中...")
+        st.warning("數據讀取中...")
 
-    # 5. 蒙地卡羅模擬選號 (Seed 鎖定當天日期)
     np.random.seed(int(datetime.now().strftime("%Y%m%d")))
-    
-    # 模擬 10,000 組結果並篩選最優的一組
     sim_picks = []
     for _ in range(100): 
         pick = np.random.choice(np.arange(1, 40), 5, p=weights/weights.sum(), replace=False)
         sim_picks.append(sorted(pick))
     
     final = [str(int(x)).zfill(2) for x in sim_picks[0]]
-    sv_final = final[:2] # 專車
-    jt_final = final[2:] # 連碰
+    sv_final = final[:2]
+    jt_final = final[2:]
 
     st.write("")
     c1, c2 = st.columns(2)
