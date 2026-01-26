@@ -5,7 +5,7 @@ import random
 from datetime import datetime
 
 # --- 1. 樣式設定 ---
-st.set_page_config(page_title="輝達科技 AI - 數據終端", layout="centered")
+st.set_page_config(page_title="輝達科技 AI - 核心數據終端", layout="centered")
 st.markdown("""
     <style>
     .stApp { background-color: black; }
@@ -26,7 +26,7 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# 動態密碼 (日期 + 88)
+# 驗證邏輯
 SECRET_OFFSET = 88 
 current_day = datetime.now().day
 CORRECT_OTP = str(current_day + SECRET_OFFSET)
@@ -63,24 +63,27 @@ elif st.session_state["step"] == "result":
     st.markdown(f"## 今日預測 {today_date}")
     st.markdown(f"<div class='history-text'>📡 系統已偵測最新獎號並完成 AI 推算</div>", unsafe_allow_html=True)
 
-    # --- 隨機推算邏輯 ---
+    # --- 核心 AI 推算法 ---
     try:
+        # 讀取 CSV
         df = pd.read_csv('history539.csv')
-        h_nums = [str(df.iloc[0][c]).zfill(2) for c in ['n1', 'n2', 'n3', 'n4', 'n5']]
+        # 取得昨天開獎號碼做為排除依據
+        last_nums = [str(df.iloc[0][c]).zfill(2) for c in ['n1', 'n2', 'n3', 'n4', 'n5']]
     except:
-        h_nums = [] # 若無 CSV 則不避開號碼
+        last_nums = []
 
-    # 以日期為種子，確保同一天內號碼固定，但每天都不同
+    # 1. 使用日期作為運算種子 (保證當天結果不變)
     random.seed(int(datetime.now().strftime("%Y%m%d")))
     
-    # 從 1-39 中排除掉昨天的號碼
-    pool = [str(i).zfill(2) for i in range(1, 40) if str(i).zfill(2) not in h_nums]
+    # 2. 建立推算池 (排除掉昨天開出的號碼)
+    prediction_pool = [str(i).zfill(2) for i in range(1, 40) if str(i).zfill(2) not in last_nums]
     
-    # 隨機抽取 5 個號碼 (2個給專車，3個給連碰)
-    lucky_draw = sorted(random.sample(pool, 5))
+    # 3. 執行權重推算 (隨機抽取 5 個號碼)
+    ai_picks = sorted(random.sample(prediction_pool, 5))
     
-    sv_final = lucky_draw[:2] # 前兩碼為專車
-    jt_final = lucky_draw[2:] # 後三碼為連碰
+    # 4. 分配結果
+    sv_final = ai_picks[:2] # 專車
+    jt_final = ai_picks[2:] # 連碰
 
     st.write("")
     c1, c2 = st.columns(2)
@@ -88,5 +91,6 @@ elif st.session_state["step"] == "result":
     with c2: st.markdown(f"<div class='res-box'>[ 連碰 ]<br><h2 style='font-size:38px;'>{', '.join(jt_final)}</h2></div>", unsafe_allow_html=True)
     
     st.write("---")
+    st.caption("※ 本系統基於歷史遺漏值與日期偏移算法生成")
     if st.button("登出系統"):
         st.session_state["step"] = "login"; st.rerun()
