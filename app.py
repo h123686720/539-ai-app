@@ -4,7 +4,7 @@ import time
 import random
 from datetime import datetime
 
-# --- 1. 樣式設定 ---
+# --- 1. 樣式設定 (輝達科技感) ---
 st.set_page_config(page_title="輝達科技 AI - 核心數據終端", layout="centered")
 st.markdown("""
     <style>
@@ -16,7 +16,7 @@ st.markdown("""
     .countdown { font-size: 150px; font-weight: bold; text-shadow: 0 0 50px #00FF41; }
     .res-box { border: 2px solid #76b900; padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.5); margin: 10px 0; }
     .history-text { font-size: 16px; color: #76b900 !important; border: 1px dashed #76b900; padding: 10px; margin-bottom: 15px; border-radius: 5px; }
-    .code-style { font-family: 'Courier New', Courier, monospace; font-size: 18px; line-height: 1.2; color: #00FF41 !important; }
+    .code-style { font-family: 'Courier New', Courier, monospace; font-size: 16px; line-height: 1.2; color: #00FF41 !important; opacity: 0.8; }
     input { background-color: #0d0d0d !important; color: #00FF41 !important; border: 1px solid #00FF41 !important; text-align: center !important; }
     .stButton>button { background: transparent !important; color: #00FF41 !important; border: 1px solid #00FF41 !important; width: 100%; height: 50px; }
     </style>
@@ -26,7 +26,7 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# 驗證邏輯
+# --- 2. 驗證邏輯 ---
 SECRET_OFFSET = 88 
 current_day = datetime.now().day
 CORRECT_OTP = str(current_day + SECRET_OFFSET)
@@ -41,16 +41,23 @@ if st.session_state["step"] == "login":
         else:
             st.error("授權碼無效")
 
+# --- 3. 亂碼解密動畫 (6行亂碼在上) ---
 elif st.session_state["step"] == "decrypting":
     msg = st.empty()
-    chars = "0123456789ABCDEF!@#$%^&*()_+<>?|/[]{}\u4e00\u9fa5" 
+    chars = "0123456789ABCDEF!@#$%^&*()_+<>?|/[]{}\u4e00\u9fa5錢贏中獎" 
     for i in range(101):
-        lines = ["".join([random.choice(chars) for _ in range(random.randint(20, 35))]) for _ in range(6)]
+        lines = ["".join([random.choice(chars) for _ in range(random.randint(25, 35))]) for _ in range(6)]
         code_html = "".join([f"<div class='code-style'>{line}</div>" for line in lines])
-        msg.markdown(f"{code_html}<br>### [AI 核心數據提取中...]<br>**系統進度: {i}%**", unsafe_allow_html=True)
+        msg.markdown(f"""
+            {code_html}
+            <br>
+            ### [AI 正在讀取歷史數據並分析]
+            **推算進度: {i}%**
+        """, unsafe_allow_html=True)
         time.sleep(0.04)
     st.session_state["step"] = "countdown"; st.rerun()
 
+# --- 4. 倒數計時 ---
 elif st.session_state["step"] == "countdown":
     num = st.empty()
     for i in range(3, 0, -1):
@@ -58,39 +65,39 @@ elif st.session_state["step"] == "countdown":
         time.sleep(1)
     st.session_state["step"] = "result"; st.rerun()
 
+# --- 5. 結果顯示 (今日預測) ---
 elif st.session_state["step"] == "result":
     today_date = datetime.now().strftime('%Y/%m/%d')
     st.markdown(f"## 今日預測 {today_date}")
     st.markdown(f"<div class='history-text'>📡 系統已偵測最新獎號並完成 AI 推算</div>", unsafe_allow_html=True)
 
-    # --- 核心 AI 推算法 ---
+    # --- 核心推算法：排除昨日號碼 ---
     try:
-        # 讀取 CSV
         df = pd.read_csv('history539.csv')
-        # 取得昨天開獎號碼做為排除依據
-        last_nums = [str(df.iloc[0][c]).zfill(2) for c in ['n1', 'n2', 'n3', 'n4', 'n5']]
+        # 取得最新一期號碼
+        h_nums = [str(df.iloc[0][c]).zfill(2) for c in ['n1', 'n2', 'n3', 'n4', 'n5']]
     except:
-        last_nums = []
+        h_nums = ["01", "02", "03", "04", "05"]
 
-    # 1. 使用日期作為運算種子 (保證當天結果不變)
+    # 使用日期鎖定隨機種子，讓當天結果唯一
     random.seed(int(datetime.now().strftime("%Y%m%d")))
     
-    # 2. 建立推算池 (排除掉昨天開出的號碼)
-    prediction_pool = [str(i).zfill(2) for i in range(1, 40) if str(i).zfill(2) not in last_nums]
+    # 建立排除後的號碼池
+    pool = [str(i).zfill(2) for i in range(1, 40) if str(i).zfill(2) not in h_nums]
     
-    # 3. 執行權重推算 (隨機抽取 5 個號碼)
-    ai_picks = sorted(random.sample(prediction_pool, 5))
+    # 隨機抽取 6 個號碼
+    all_picks = sorted(random.sample(pool, 6))
     
-    # 4. 分配結果
-    sv_final = ai_picks[:2] # 專車
-    jt_final = ai_picks[2:] # 連碰
+    sv_final = all_picks[:2] # 專車
+    jt_final = all_picks[2:] # 連碰 (取剩下4碼或3碼皆可)
 
     st.write("")
     c1, c2 = st.columns(2)
-    with c1: st.markdown(f"<div class='res-box'>[ 專車 ]<br><h2 style='font-size:38px;'>{', '.join(sv_final)}</h2></div>", unsafe_allow_html=True)
-    with c2: st.markdown(f"<div class='res-box'>[ 連碰 ]<br><h2 style='font-size:38px;'>{', '.join(jt_final)}</h2></div>", unsafe_allow_html=True)
+    with c1: 
+        st.markdown(f"<div class='res-box'>[ 專車 ]<br><h2 style='font-size:38px;'>{', '.join(sv_final)}</h2></div>", unsafe_allow_html=True)
+    with c2: 
+        st.markdown(f"<div class='res-box'>[ 連碰 ]<br><h2 style='font-size:38px;'>{', '.join(jt_final)}</h2></div>", unsafe_allow_html=True)
     
     st.write("---")
-    st.caption("※ 本系統基於歷史遺漏值與日期偏移算法生成")
     if st.button("登出系統"):
         st.session_state["step"] = "login"; st.rerun()
