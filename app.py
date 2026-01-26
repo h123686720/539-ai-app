@@ -69,7 +69,8 @@ elif st.session_state["step"] == "result":
     try:
         df = pd.read_csv('history539.csv')
         total_data = len(df)
-        st.markdown(f"<div class='history-text'>📡 成功解析 {total_data} 期歷史數據 | 蒙地卡羅演算完成</div>", unsafe_allow_html=True)
+       # 強制讓顯示數字與您的檔案期數對齊
+st.markdown(f"<div class='history-text'>📡 成功解析 {len(df)} 期歷史數據 | 蒙地卡羅演算完成</div>", unsafe_allow_html=True)
         
         # 1. 計算所有號碼的出現頻率 (熱度)
         all_nums = df[['n1', 'n2', 'n3', 'n4', 'n5']].values.flatten()
@@ -107,3 +108,4 @@ elif st.session_state["step"] == "result":
     st.caption("AI 分析模型：尾數/五區/對角線/跳號/蒙地卡羅 (Monte Carlo)")
     if st.button("登出系統"):
         st.session_state["step"] = "login"; st.rerun()
+
