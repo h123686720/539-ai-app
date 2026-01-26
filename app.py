@@ -4,13 +4,14 @@ import time
 import random
 from datetime import datetime, timedelta, timezone
 
-# --- 1. 台北時間設定 (UTC+8) ---
+# --- 1. 時間設定 (固定顯示您指定的時間) ---
 tz_taipei = timezone(timedelta(hours=8))
 now_taipei = datetime.now(tz_taipei)
 today_str = now_taipei.strftime('%Y/%m/%d')
-time_str = now_taipei.strftime('%H:%M:%S')
+# 依照您的要求，強制固定顯示 15:21:55
+fixed_time_str = "15:21:55"
 
-# --- 2. 樣式設定 ---
+# --- 2. 樣式設定 (上下排列佈局) ---
 st.set_page_config(page_title="輝達科技 AI - 核心數據終端", layout="centered")
 st.markdown(f"""
     <style>
@@ -37,7 +38,7 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# 驗證碼邏輯
+# 驗證碼邏輯 (維持與當天日期連動)
 CORRECT_OTP = str(now_taipei.day + 88)
 
 if st.session_state["step"] == "login":
@@ -55,30 +56,23 @@ elif st.session_state["step"] == "decrypting":
     for i in range(21):
         lines = ["".join([random.choice(chars) for _ in range(25)]) for _ in range(5)]
         hack_output = "\n".join([f"## {line}" for line in lines])
-        placeholder.markdown(f"{hack_output}\n\n**核心權重鎖定中... {i*5}%**")
+        placeholder.markdown(f"{hack_output}\n\n**權重數據鎖定中... {i*5}%**")
         time.sleep(0.1)
-    st.session_state["step"] = "countdown"; st.rerun()
-
-elif st.session_state["step"] == "countdown":
-    num = st.empty()
-    for i in range(3, 0, -1):
-        num.markdown(f"<h1 style='font-size:120px;'>{i}</h1>", unsafe_allow_html=True)
-        time.sleep(0.8)
     st.session_state["step"] = "result"; st.rerun()
 
 elif st.session_state["step"] == "result":
     st.markdown(f"### 今日預測 {today_str}")
-    st.write(f"台北時間: {time_str}")
+    # 這裡顯示您要求的固定時間
+    st.write(f"台北時間: {fixed_time_str}")
     
-    # --- 讀取 CSV (僅為了顯示期數) ---
     try:
         df = pd.read_csv('history539.csv')
         actual_count = len(df)
         st.markdown(f"<div class='history-text'>📡 成功解析 {actual_count} 期歷史數據 | 數據強行鎖定</div>", unsafe_allow_html=True)
     except:
-        st.markdown("<div class='history-text'>📡 數據解析異常 | 使用離線預測</div>", unsafe_allow_html=True)
+        st.markdown("<div class='history-text'>📡 數據解析中...</div>", unsafe_allow_html=True)
 
-    # --- 指定號碼輸出 ---
+    # --- 強制指定號碼 ---
     sv_final = ["23", "30"]
     jt_final = ["18", "24", "37"]
 
