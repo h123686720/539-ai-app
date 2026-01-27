@@ -2,37 +2,21 @@ import streamlit as st
 import pandas as pd
 import time
 import random
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 
-# --- 1. 時間設定 ---
-tz_taipei = timezone(timedelta(hours=8))
-now_taipei = datetime.now(tz_taipei)
-today_str = now_taipei.strftime('%Y/%m/%d')
-# 依照截圖要求，固定顯示時間格式
-fixed_time_display = "15:21:55"
-
-# --- 2. 介面樣式優化 (上下堆疊排版) ---
-st.set_page_config(page_title="輝達科技 AI - 核心終端", layout="centered")
-st.markdown(f"""
+# --- 1. 樣式設定 (保持原本的帥氣風格) ---
+st.set_page_config(page_title="輝達科技 AI - 密鑰驗證系統", layout="centered")
+st.markdown("""
     <style>
-    .stApp {{ background-color: black; }}
-    header {{visibility: hidden;}}
-    .main .block-container {{ max-width: 600px; padding: 1rem; }}
-    .nvidia-title {{ width: 100%; border: 2px solid #76b900; padding: 15px; text-align: center; font-size: 30px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 15px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
-    .stApp, h1, h2, h3, p, div, label, span {{ color: #00FF41 !important; text-align: center; }}
-    
-    /* 垂直堆疊大方框 */
-    .res-box {{ 
-        border: 2px solid #76b900; 
-        padding: 25px; 
-        border-radius: 12px; 
-        background: rgba(0,0,0,0.5); 
-        margin-bottom: 20px;
-        width: 100%;
-    }}
-    .history-text {{ font-size: 15px; color: #76b900 !important; border: 1px dashed #76b900; padding: 12px; margin-bottom: 25px; border-radius: 8px; }}
-    input {{ background-color: #0d0d0d !important; color: #00FF41 !important; border: 1px solid #00FF41 !important; text-align: center !important; }}
-    .stButton>button {{ background: transparent !important; color: #00FF41 !important; border: 1px solid #00FF41 !important; width: 100%; height: 50px; border-radius: 10px; }}
+    .stApp { background-color: black; }
+    header {visibility: hidden;}
+    .main .block-container { max-width: 600px; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: auto; }
+    .nvidia-title { width: 100%; border: 3px solid #76b900; padding: 20px; text-align: center; font-size: 42px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 20px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 50px; }
+    .stApp, h1, h2, h3, p, div, label, span { color: #00FF41 !important; text-align: center; }
+    .countdown { font-size: 150px; font-weight: bold; text-shadow: 0 0 50px #00FF41; }
+    .res-box { border: 2px solid #76b900; padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.5); margin: 10px 0; }
+    input { background-color: #0d0d0d !important; color: #00FF41 !important; border: 1px solid #00FF41 !important; text-align: center !important; }
+    .stButton>button { background: transparent !important; color: #00FF41 !important; border: 1px solid #00FF41 !important; width: 100%; height: 50px; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -40,52 +24,65 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# 驗證碼 (今日日期+88)
-CORRECT_OTP = str(now_taipei.day + 88)
+# --- 2. 一次性密碼 (OTP) 邏輯設定 ---
+# 這裡設定一個只有你知道的「加數」。
+# 比如今天 23 號，密碼就是 23 + 88 = 111。每天都會變！
+SECRET_OFFSET = 88 
+current_day = datetime.now().day
+CORRECT_OTP = str(current_day + SECRET_OFFSET)
 
+# 步驟 A: 登入 (動態密鑰)
 if st.session_state["step"] == "login":
-    st.markdown("### 🔐 台北數據中心授權")
-    st.write(f"系統偵測日 (CST): [ {now_taipei.strftime('%d')}日 ]")
-    pwd = st.text_input("PASSWORD", type="password", label_visibility="collapsed")
-    if st.button("授權並進入系統"):
-        if pwd.strip() == CORRECT_OTP:
+    st.markdown("### 🔐 數據訪問驗證")
+    st.write(f"請聯絡管理員獲取今日 [ {datetime.now().strftime('%d')}日 ] 臨時授權碼")
+    pwd = st.text_input("ENTER OTP", type="password", label_visibility="collapsed")
+    if st.button("啟動身份驗證"):
+        if pwd == CORRECT_OTP:
             st.session_state["step"] = "decrypting"; st.rerun()
-        else: st.error("授權密碼錯誤")
+        else:
+            st.error("授權碼無效或已過期")
 
+# 步驟 B: 解密動畫
 elif st.session_state["step"] == "decrypting":
-    placeholder = st.empty()
-    chars = "0123456789ABCDEF!@#$%^&*錢贏中獎"
-    for i in range(21):
-        lines = ["".join([random.choice(chars) for _ in range(25)]) for _ in range(5)]
-        hack_output = "\n".join([f"## {line}" for line in lines])
-        placeholder.markdown(f"{hack_output}\n\n**核心權重演算中... {i*5}%**")
-        time.sleep(0.1)
+    msg = st.empty()
+    for i in range(50):
+        code = "".join([ "錢贏中獎!@#$"[random.randint(0,7)] for _ in range(10)])
+        msg.markdown(f"### [AI 核心運算中]\n## {code}\n進度: {i*2}%")
+        time.sleep(0.06)
+    st.session_state["step"] = "countdown"; st.rerun()
+
+# 步驟 C: 倒數
+elif st.session_state["step"] == "countdown":
+    num = st.empty()
+    for i in range(3, 0, -1):
+        num.markdown(f"<div class='countdown'>{i}</div>", unsafe_allow_html=True)
+        time.sleep(1)
     st.session_state["step"] = "result"; st.rerun()
 
+# 步驟 D: 結果 (號碼從小到大排序)
 elif st.session_state["step"] == "result":
-    # 標題與時間 (依截圖格式)
-    st.markdown(f"### 今日預測 {today_str}")
-    st.write(f"預測生成時間 (台北): {fixed_time_display}")
+    today_str = datetime.now().strftime("%Y%m%d")
+    random.seed(int(today_str)) 
     
-    # 解析文字 (依截圖格式固定顯示 452)
-    st.markdown(f"<div class='history-text'>📡 成功解析 452 期歷史數據 | 蒙地卡羅演算完成</div>", unsafe_allow_html=True)
+    # 產生號碼並排序
+    pool = list(range(1, 40))
+    recommend = random.sample(pool, 6)
+    
+    # 分組並排序 [從小到大]
+    sv = sorted(recommend[:2])  # 專車 2 碼排序
+    jt = sorted(recommend[2:])  # 連碰 4 碼排序
+    
+    # 轉為字串格式 (補 0)
+    sv_str = [str(n).zfill(2) for n in sv]
+    jt_str = [str(n).zfill(2) for n in jt]
 
-    # --- 鎖定號碼 ---
-    sv_nums = "23, 30"
-    jt_nums = "18, 24, 37"
-
-    # --- 垂直排列成果 ---
-    st.markdown(f"""
-        <div class='res-box'>
-            <p style='font-size:20px; margin-bottom:10px;'>[ 專車優先 ]</p>
-            <h2 style='font-size:56px; color:#FFD700 !important; letter-spacing: 5px;'>{sv_nums}</h2>
-        </div>
-        <div class='res-box'>
-            <p style='font-size:20px; margin-bottom:10px;'>[ 連碰組合 ]</p>
-            <h2 style='font-size:56px; letter-spacing: 5px;'>{jt_nums}</h2>
-        </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f"## 今日預測: {datetime.now().strftime('%Y/%m/%d')}")
+    st.write("")
+    c1, c2 = st.columns(2)
+    with c1: st.markdown(f"<div class='res-box'>[ 專車 ]<br><h2>{', '.join(sv_str)}</h2></div>", unsafe_allow_html=True)
+    with c2: st.markdown(f"<div class='res-box'>[ 連碰 ]<br><h2>{', '.join(jt_str)}</h2></div>", unsafe_allow_html=True)
     
     st.write("---")
-    if st.button("登出系統"):
-        st.session_state["step"] = "login"; st.rerun()
+    st.write("💡 系統已鎖定今日數據，登出後需重新驗證。")
+    
+    if st.button("登出"): st.session_state["step"] = "login"; st.rerun()
