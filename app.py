@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
 today_str = now_cst.strftime('%Y/%m/%d')
-# 依照您的要求，固定顯示 15:21:55
+# 固定顯示您要求的生成時間
 fixed_time_display = "15:21:55"
 
 # --- 2. 介面樣式 ---
@@ -38,7 +38,7 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# 驗證碼 (今日日期+88)
+# 驗證碼 (今日 29日 + 88 = 117)
 CORRECT_OTP = str(now_cst.day + 88)
 
 if st.session_state["step"] == "login":
@@ -66,9 +66,9 @@ elif st.session_state["step"] == "result":
     st.write(f"預測生成時間 (中原時間): {fixed_time_display}")
     st.markdown(f"<div class='history-text'>📡 成功解析 452 期歷史數據 | 穩定度算法完成</div>", unsafe_allow_html=True)
 
-    # 指定鎖定號碼
-    sv_display = "12, 23"
-    jt_display = "16, 17, 18"
+    # --- 最新指定號碼 ---
+    sv_display = "06, 10"
+    jt_display = "11, 22, 38"
 
     # 上下垂直排列佈局
     st.markdown(f"""
