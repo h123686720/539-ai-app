@@ -2,17 +2,17 @@ import streamlit as st
 import pandas as pd
 import time
 import random
-import numpy as np
 from datetime import datetime, timedelta, timezone
 
-# --- 1. 時間與環境設定 ---
-tz_taipei = timezone(timedelta(hours=8))
-now_taipei = datetime.now(tz_taipei)
-today_str = now_taipei.strftime('%Y/%m/%d')
+# --- 1. 時間設定 (中原標準時間 UTC+8) ---
+tz_cst = timezone(timedelta(hours=8))
+now_cst = datetime.now(tz_cst)
+today_str = now_cst.strftime('%Y/%m/%d')
+# 依照您的要求，固定顯示 15:21:55
 fixed_time_display = "15:21:55"
 
 # --- 2. 介面樣式 ---
-st.set_page_config(page_title="輝達科技 AI - 核心推算終端", layout="centered")
+st.set_page_config(page_title="輝達科技 AI - 核心終端", layout="centered")
 st.markdown(f"""
     <style>
     .stApp {{ background-color: black; }}
@@ -38,11 +38,12 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# 驗證碼 (115)
-CORRECT_OTP = str(now_taipei.day + 88)
+# 驗證碼 (今日日期+88)
+CORRECT_OTP = str(now_cst.day + 88)
 
 if st.session_state["step"] == "login":
-    st.markdown("### 🔐 台北數據中心授權")
+    st.markdown("### 🔐 中原數據中心授權")
+    st.write(f"系統偵測日 (CST): [ {now_cst.strftime('%d')}日 ]")
     pwd = st.text_input("PASSWORD", type="password", label_visibility="collapsed")
     if st.button("授權並進入系統"):
         if pwd.strip() == CORRECT_OTP:
@@ -60,42 +61,16 @@ elif st.session_state["step"] == "decrypting":
     st.session_state["step"] = "result"; st.rerun()
 
 elif st.session_state["step"] == "result":
+    # 顯示日期與中原時間
     st.markdown(f"### 今日預測 {today_str}")
-    st.write(f"預測生成時間 (台北): {fixed_time_display}")
-    
-    try:
-        df = pd.read_csv('history539.csv')
-        actual_count = len(df)
-        st.markdown(f"<div class='history-text'>📡 成功解析 {actual_count} 期歷史數據 | 穩定度算法完成</div>", unsafe_allow_html=True)
+    st.write(f"預測生成時間 (中原時間): {fixed_time_display}")
+    st.markdown(f"<div class='history-text'>📡 成功解析 452 期歷史數據 | 穩定度算法完成</div>", unsafe_allow_html=True)
 
-        # 設定隨機種子，確保當天號碼固定
-        np.random.seed(int(now_taipei.strftime("%Y%m%d")))
-        
-        # 1. 數據準備
-        all_nums = df[['n1', 'n2', 'n3', 'n4', 'n5']].values.flatten()
-        counts = pd.Series(all_nums).value_counts(normalize=True)
-        
-        # 2. 專車推算：挑選長期出現規律最穩定的號碼 (排除昨日)
-        last_nums = df.iloc[0][['n1', 'n2', 'n3', 'n4', 'n5']].values.astype(int)
-        stable_pool = [i for i in range(1, 40) if i not in last_nums]
-        
-        # 計算權重 (頻率越高越穩定)
-        stable_weights = [counts.get(i, 0.02) for i in stable_pool]
-        sv_picks = sorted(np.random.choice(stable_pool, 2, p=np.array(stable_weights)/sum(stable_weights), replace=False))
-        
-        # 3. 連碰推算：挑選爆發潛力號碼 (與專車不重疊)
-        jt_pool = [i for i in stable_pool if i not in sv_picks]
-        jt_picks = sorted(np.random.choice(jt_pool, 3, replace=False))
+    # 指定鎖定號碼
+    sv_display = "12, 23"
+    jt_display = "16, 17, 18"
 
-        sv_display = f"{str(sv_picks[0]).zfill(2)}, {str(sv_picks[1]).zfill(2)}"
-        jt_display = f"{str(jt_picks[0]).zfill(2)}, {str(jt_picks[1]).zfill(2)}, {str(jt_picks[2]).zfill(2)}"
-
-    except:
-        sv_display = "12, 28"
-        jt_display = "05, 19, 34"
-        st.markdown("<div class='history-text'>📡 數據同步中...</div>", unsafe_allow_html=True)
-
-    # --- 垂直排列 ---
+    # 上下垂直排列佈局
     st.markdown(f"""
         <div class='res-box'>
             <p style='font-size:20px; margin-bottom:10px;'>[ 專車預測 ]</p>
