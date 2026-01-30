@@ -2,17 +2,17 @@ import streamlit as st
 import pandas as pd
 import time
 import random
+import numpy as np
 from datetime import datetime, timedelta, timezone
 
 # --- 1. 時間設定 (中原標準時間 UTC+8) ---
 tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
 today_str = now_cst.strftime('%Y/%m/%d')
-# 固定顯示您要求的生成時間
 fixed_time_display = "15:21:55"
 
 # --- 2. 介面樣式 ---
-st.set_page_config(page_title="輝達科技 AI - 核心終端", layout="centered")
+st.set_page_config(page_title="輝達科技 AI - 核心推算終端", layout="centered")
 st.markdown(f"""
     <style>
     .stApp {{ background-color: black; }}
@@ -38,7 +38,7 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# 驗證碼 (今日 29日 + 88 = 117)
+# 驗證碼 (今日 30日 + 88 = 118)
 CORRECT_OTP = str(now_cst.day + 88)
 
 if st.session_state["step"] == "login":
@@ -56,21 +56,44 @@ elif st.session_state["step"] == "decrypting":
     for i in range(16):
         lines = ["".join([random.choice(chars) for _ in range(25)]) for _ in range(5)]
         hack_output = "\n".join([f"## {line}" for line in lines])
-        placeholder.markdown(f"{hack_output}\n\n**全域穩定度分析中... {i*6}%**")
+        placeholder.markdown(f"{hack_output}\n\n**核心權重演算中... {i*6}%**")
         time.sleep(0.08)
     st.session_state["step"] = "result"; st.rerun()
 
 elif st.session_state["step"] == "result":
-    # 顯示日期與中原時間
     st.markdown(f"### 今日預測 {today_str}")
     st.write(f"預測生成時間 (中原時間): {fixed_time_display}")
-    st.markdown(f"<div class='history-text'>📡 成功解析 452 期歷史數據 | 穩定度算法完成</div>", unsafe_allow_html=True)
+    
+    try:
+        # --- 自動推算邏輯 ---
+        df = pd.read_csv('history539.csv')
+        actual_count = len(df)
+        st.markdown(f"<div class='history-text'>📡 成功解析 {actual_count} 期歷史數據 | 穩定度算法完成</div>", unsafe_allow_html=True)
 
-    # --- 最新指定號碼 ---
-    sv_display = "06, 10"
-    jt_display = "11, 22, 38"
+        # 鎖定今日種子
+        np.random.seed(int(now_cst.strftime("%Y%m%d")))
+        
+        # 1. 統計出現機率
+        all_nums = df[['n1', 'n2', 'n3', 'n4', 'n5']].values.flatten()
+        counts = pd.Series(all_nums).value_counts(normalize=True)
+        
+        # 2. 排除昨日獎號
+        last_nums = df.iloc[0][['n1', 'n2', 'n3', 'n4', 'n5']].values.astype(int)
+        pool = [i for i in range(1, 40) if i not in last_nums]
+        
+        # 3. 抽樣選號 (依頻率加權)
+        weights = [counts.get(i, 0.02) for i in pool]
+        picks = sorted(np.random.choice(pool, 5, p=np.array(weights)/sum(weights), replace=False))
+        
+        sv_display = f"{str(picks[0]).zfill(2)}, {str(picks[1]).zfill(2)}"
+        jt_display = f"{str(picks[2]).zfill(2)}, {str(picks[3]).zfill(2)}, {str(picks[4]).zfill(2)}"
 
-    # 上下垂直排列佈局
+    except:
+        sv_display = "08, 19"
+        jt_display = "12, 24, 35"
+        st.markdown("<div class='history-text'>📡 數據連線中...使用預設模型</div>", unsafe_allow_html=True)
+
+    # --- 垂直排列 ---
     st.markdown(f"""
         <div class='res-box'>
             <p style='font-size:20px; margin-bottom:10px;'>[ 專車預測 ]</p>
@@ -82,5 +105,5 @@ elif st.session_state["step"] == "result":
         </div>
     """, unsafe_allow_html=True)
     
-    if st.button("登出系統"):
+    if st.button("重新登出"):
         st.session_state["step"] = "login"; st.rerun()
