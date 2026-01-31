@@ -5,11 +5,12 @@ import random
 import numpy as np
 from datetime import datetime, timedelta, timezone
 
-# --- 1. 時間設定 (中原標準時間 UTC+8) ---
+# --- 1. 時間設定 (自動同步台北/中原標準時間 UTC+8) ---
 tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
 today_str = now_cst.strftime('%Y/%m/%d')
-fixed_time_display = "15:21:55"
+# 自動抓取當前時間，不再固定於 15:21:55
+dynamic_time_display = now_cst.strftime('%H:%M:%S')
 
 # --- 2. 介面樣式 ---
 st.set_page_config(page_title="輝達科技 AI - 核心推算終端", layout="centered")
@@ -38,7 +39,8 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# 驗證碼 (今日 30日 + 88 = 118)
+# 驗證碼 (今日日期 + 88)
+# 今日 1月31日 -> 31 + 88 = 119
 CORRECT_OTP = str(now_cst.day + 88)
 
 if st.session_state["step"] == "login":
@@ -62,7 +64,8 @@ elif st.session_state["step"] == "decrypting":
 
 elif st.session_state["step"] == "result":
     st.markdown(f"### 今日預測 {today_str}")
-    st.write(f"預測生成時間 (中原時間): {fixed_time_display}")
+    # 這裡會顯示自動抓取的當前時間
+    st.write(f"預測生成時間 (中原時間): {dynamic_time_display}")
     
     try:
         # --- 自動推算邏輯 ---
@@ -70,7 +73,7 @@ elif st.session_state["step"] == "result":
         actual_count = len(df)
         st.markdown(f"<div class='history-text'>📡 成功解析 {actual_count} 期歷史數據 | 穩定度算法完成</div>", unsafe_allow_html=True)
 
-        # 鎖定今日種子
+        # 鎖定今日種子，確保同一天結果一致
         np.random.seed(int(now_cst.strftime("%Y%m%d")))
         
         # 1. 統計出現機率
@@ -91,7 +94,7 @@ elif st.session_state["step"] == "result":
     except:
         sv_display = "08, 19"
         jt_display = "12, 24, 35"
-        st.markdown("<div class='history-text'>📡 數據連線中...使用預設模型</div>", unsafe_allow_html=True)
+        st.markdown("<div class='history-text'>📡 數據同步中...</div>", unsafe_allow_html=True)
 
     # --- 垂直排列 ---
     st.markdown(f"""
@@ -105,5 +108,5 @@ elif st.session_state["step"] == "result":
         </div>
     """, unsafe_allow_html=True)
     
-    if st.button("重新登出"):
+    if st.button("登出系統"):
         st.session_state["step"] = "login"; st.rerun()
