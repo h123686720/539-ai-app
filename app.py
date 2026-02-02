@@ -4,12 +4,11 @@ import time
 import random
 from datetime import datetime, timedelta, timezone
 
-# --- 1. 時間與顯示設定 (依照要求鎖定) ---
+# --- 1. 時間設定 (自動同步中原標準時間 UTC+8) ---
 tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
 today_str = now_cst.strftime('%Y/%m/%d')
-# 強制固定顯示 14:25:30
-fixed_time_display = "14:25:30"
+dynamic_time_display = now_cst.strftime('%H:%M:%S')
 
 # --- 2. 介面樣式設計 ---
 st.set_page_config(page_title="輝達科技 AI - 核心終端", layout="centered")
@@ -38,18 +37,24 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# 授權密碼
-FIXED_PASSWORD = "8888" 
+# --- 授權碼日期邏輯：2/3 號開始切換 ---
+# 建立 2026/02/03 的比較基準
+switch_date = datetime(2026, 2, 3, tzinfo=tz_cst)
+
+if now_cst >= switch_date:
+    CURRENT_PASSWORD = "1357"
+else:
+    CURRENT_PASSWORD = "8888"
 
 if st.session_state["step"] == "login":
     st.markdown("### 🔐 台灣彩券數據中心授權")
-    st.write(f"當前系統日期: {today_str}")
+    st.write(f"系統偵測日期: {today_str}")
     pwd = st.text_input("請輸入授權密碼", type="password", label_visibility="collapsed")
     if st.button("授權並進入系統"):
-        if pwd == FIXED_PASSWORD:
+        if pwd == CURRENT_PASSWORD:
             st.session_state["step"] = "decrypting"; st.rerun()
         else:
-            st.error("授權密碼錯誤")
+            st.error(f"授權失敗 (提示：{today_str} 密碼已更新)")
 
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
@@ -57,18 +62,16 @@ elif st.session_state["step"] == "decrypting":
     for i in range(11):
         lines = ["".join([random.choice(chars) for _ in range(25)]) for _ in range(5)]
         hack_output = "\n".join([f"## {line}" for line in lines])
-        placeholder.markdown(f"{hack_output}\n\n**核心數據解析中... {i*10}%**")
+        placeholder.markdown(f"{hack_output}\n\n**核心數據同步中... {i*10}%**")
         time.sleep(0.1)
     st.session_state["step"] = "result"; st.rerun()
 
 elif st.session_state["step"] == "result":
     st.markdown(f"### 今日預測 {today_str}")
-    st.write(f"預測生成時間 (中原時間): {fixed_time_display}")
-    
-    # 顯示固定解析文字
+    st.write(f"預測生成時間 (中原時間): {dynamic_time_display}")
     st.markdown(f"<div class='history-text'>📡 成功解析 452 期歷史數據 | 穩定度算法完成</div>", unsafe_allow_html=True)
 
-    # --- 依照要求鎖定號碼 ---
+    # 號碼維持指定
     sv_display = "08, 31"
     jt_display = "36, 37, 38"
 
