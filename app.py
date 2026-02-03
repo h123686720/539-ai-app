@@ -5,20 +5,20 @@ import random
 import numpy as np
 from datetime import datetime, timedelta, timezone
 
-# --- 1. 時間與動態環境設定 ---
+# --- 1. 時間設定 (自動同步中原標準時間 UTC+8) ---
 tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
 today_str = now_cst.strftime('%Y/%m/%d')
 dynamic_time_display = now_cst.strftime('%H:%M:%S')
 
-# --- 2. 介面樣式優化 ---
+# --- 2. 介面樣式設計 ---
 st.set_page_config(page_title="輝達科技 AI - 核心推算終端", layout="centered")
 st.markdown(f"""
     <style>
     .stApp {{ background-color: black; }}
     header {{visibility: hidden;}}
     .main .block-container {{ max-width: 600px; padding: 1rem; }}
-    .nvidia-title {{ width: 100%; border: 3px solid #76b900; padding: 15px; text-align: center; font-size: 30px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 15px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
+    .nvidia-title {{ width: 100%; border: 2px solid #76b900; padding: 15px; text-align: center; font-size: 30px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 15px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
     .stApp, h1, h2, h3, p, div, label, span {{ color: #00FF41 !important; text-align: center; }}
     .res-box {{ 
         border: 2px solid #76b900; 
@@ -38,9 +38,14 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# --- 授權碼日期邏輯：2/3 號開始切換為 1357 ---
-switch_date = datetime(2026, 2, 3, tzinfo=tz_cst)
-CURRENT_PASSWORD = "1357" if now_cst >= switch_date else "8888"
+# --- 授權碼邏輯：2/4 10:20 切換 ---
+# 設定切換時間點
+switch_time = datetime(2026, 2, 4, 10, 20, 0, tzinfo=tz_cst)
+
+if now_cst >= switch_time:
+    CURRENT_PASSWORD = "168"
+else:
+    CURRENT_PASSWORD = "1357"
 
 if st.session_state["step"] == "login":
     st.markdown("### 🔐 台灣彩券數據中心授權")
@@ -58,7 +63,7 @@ elif st.session_state["step"] == "decrypting":
     for i in range(11):
         lines = ["".join([random.choice(chars) for _ in range(25)]) for _ in range(5)]
         hack_output = "\n".join([f"## {line}" for line in lines])
-        placeholder.markdown(f"{hack_output}\n\n**全域穩定度演算中... {i*10}%**")
+        placeholder.markdown(f"{hack_output}\n\n**核心權重演算中... {i*10}%**")
         time.sleep(0.08)
     st.session_state["step"] = "result"; st.rerun()
 
@@ -67,13 +72,17 @@ elif st.session_state["step"] == "result":
     st.write(f"預測生成時間 (中原時間): {dynamic_time_display}")
     
     try:
-        # --- AI 推算核心邏輯 ---
+        # --- 預測邏輯 ---
         df = pd.read_csv('history539.csv')
         actual_count = len(df)
         st.markdown(f"<div class='history-text'>📡 成功解析 {actual_count} 期歷史數據 | 穩定度算法完成</div>", unsafe_allow_html=True)
 
-        # 鎖定今日種子，確保同一天結果不變
-        np.random.seed(int(now_cst.strftime("%Y%m%d")))
+        # --- 重要：鎖定 2/4 號碼維持與 2/3 相同 ---
+        # 如果日期是 2/4，我們強制讓種子使用 2/3 的數值
+        if now_cst.month == 2 and now_cst.day == 4:
+            np.random.seed(20260203)
+        else:
+            np.random.seed(int(now_cst.strftime("%Y%m%d")))
         
         # 1. 數據分佈統計
         all_nums = df[['n1', 'n2', 'n3', 'n4', 'n5']].values.flatten()
