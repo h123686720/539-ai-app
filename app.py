@@ -2,22 +2,23 @@ import streamlit as st
 import pandas as pd
 import time
 import random
+import numpy as np
 from datetime import datetime, timedelta, timezone
 
-# --- 1. 時間設定 (自動同步中原標準時間 UTC+8) ---
+# --- 1. 時間與動態環境設定 ---
 tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
 today_str = now_cst.strftime('%Y/%m/%d')
 dynamic_time_display = now_cst.strftime('%H:%M:%S')
 
-# --- 2. 介面樣式設計 ---
-st.set_page_config(page_title="輝達科技 AI - 核心終端", layout="centered")
+# --- 2. 介面樣式優化 ---
+st.set_page_config(page_title="輝達科技 AI - 核心推算終端", layout="centered")
 st.markdown(f"""
     <style>
     .stApp {{ background-color: black; }}
     header {{visibility: hidden;}}
     .main .block-container {{ max-width: 600px; padding: 1rem; }}
-    .nvidia-title {{ width: 100%; border: 2px solid #76b900; padding: 15px; text-align: center; font-size: 30px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 15px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
+    .nvidia-title {{ width: 100%; border: 3px solid #76b900; padding: 15px; text-align: center; font-size: 30px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 15px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
     .stApp, h1, h2, h3, p, div, label, span {{ color: #00FF41 !important; text-align: center; }}
     .res-box {{ 
         border: 2px solid #76b900; 
@@ -37,14 +38,9 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# --- 授權碼日期邏輯：2/3 號開始切換 ---
-# 建立 2026/02/03 的比較基準
+# --- 授權碼日期邏輯：2/3 號開始切換為 1357 ---
 switch_date = datetime(2026, 2, 3, tzinfo=tz_cst)
-
-if now_cst >= switch_date:
-    CURRENT_PASSWORD = "1357"
-else:
-    CURRENT_PASSWORD = "8888"
+CURRENT_PASSWORD = "1357" if now_cst >= switch_date else "8888"
 
 if st.session_state["step"] == "login":
     st.markdown("### 🔐 台灣彩券數據中心授權")
@@ -54,7 +50,7 @@ if st.session_state["step"] == "login":
         if pwd == CURRENT_PASSWORD:
             st.session_state["step"] = "decrypting"; st.rerun()
         else:
-            st.error(f"授權失敗 (提示：{today_str} 密碼已更新)")
+            st.error(f"授權失敗 (請輸入當前時段密碼)")
 
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
@@ -62,19 +58,45 @@ elif st.session_state["step"] == "decrypting":
     for i in range(11):
         lines = ["".join([random.choice(chars) for _ in range(25)]) for _ in range(5)]
         hack_output = "\n".join([f"## {line}" for line in lines])
-        placeholder.markdown(f"{hack_output}\n\n**核心數據同步中... {i*10}%**")
-        time.sleep(0.1)
+        placeholder.markdown(f"{hack_output}\n\n**全域穩定度演算中... {i*10}%**")
+        time.sleep(0.08)
     st.session_state["step"] = "result"; st.rerun()
 
 elif st.session_state["step"] == "result":
     st.markdown(f"### 今日預測 {today_str}")
     st.write(f"預測生成時間 (中原時間): {dynamic_time_display}")
-    st.markdown(f"<div class='history-text'>📡 成功解析 452 期歷史數據 | 穩定度算法完成</div>", unsafe_allow_html=True)
+    
+    try:
+        # --- AI 推算核心邏輯 ---
+        df = pd.read_csv('history539.csv')
+        actual_count = len(df)
+        st.markdown(f"<div class='history-text'>📡 成功解析 {actual_count} 期歷史數據 | 穩定度算法完成</div>", unsafe_allow_html=True)
 
-    # 號碼維持指定
-    sv_display = "08, 31"
-    jt_display = "36, 37, 38"
+        # 鎖定今日種子，確保同一天結果不變
+        np.random.seed(int(now_cst.strftime("%Y%m%d")))
+        
+        # 1. 數據分佈統計
+        all_nums = df[['n1', 'n2', 'n3', 'n4', 'n5']].values.flatten()
+        counts = pd.Series(all_nums).value_counts(normalize=True)
+        
+        # 2. 篩選排除昨日獎號後的池子
+        last_nums = df.iloc[0][['n1', 'n2', 'n3', 'n4', 'n5']].values.astype(int)
+        pool = [i for i in range(1, 40) if i not in last_nums]
+        
+        # 3. 執行穩定度抽樣 (加權推算)
+        weights = [counts.get(i, 0.02) for i in pool]
+        picks = sorted(np.random.choice(pool, 5, p=np.array(weights)/sum(weights), replace=False))
+        
+        # 4. 依照大小排列並分配 (2專車, 3連碰)
+        sv_display = f"{str(picks[0]).zfill(2)}, {str(picks[1]).zfill(2)}"
+        jt_display = f"{str(picks[2]).zfill(2)}, {str(picks[3]).zfill(2)}, {str(picks[4]).zfill(2)}"
 
+    except Exception as e:
+        sv_display = "05, 12"
+        jt_display = "18, 27, 34"
+        st.markdown("<div class='history-text'>📡 雲端數據同步中...</div>", unsafe_allow_html=True)
+
+    # --- 垂直結果排版 ---
     st.markdown(f"""
         <div class='res-box'>
             <p style='font-size:20px; margin-bottom:10px;'>[ 專車預測 ]</p>
