@@ -18,7 +18,7 @@ st.markdown(f"""
     .stApp {{ background-color: black; }}
     header {{visibility: hidden;}}
     .main .block-container {{ max-width: 600px; padding: 1rem; }}
-    .nvidia-title {{ width: 100%; border: 2px solid #76b900; padding: 15px; text-align: center; font-size: 30px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 15px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
+    .nvidia-title {{ width: 100%; border: 3px solid #76b900; padding: 15px; text-align: center; font-size: 30px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 15px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
     .stApp, h1, h2, h3, p, div, label, span {{ color: #00FF41 !important; text-align: center; }}
     .res-box {{ 
         border: 2px solid #76b900; 
@@ -38,14 +38,9 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# --- 授權碼邏輯：2/4 10:20 切換 ---
-# 設定切換時間點
+# --- 授權碼邏輯：2/4 10:20 切換為 168 ---
 switch_time = datetime(2026, 2, 4, 10, 20, 0, tzinfo=tz_cst)
-
-if now_cst >= switch_time:
-    CURRENT_PASSWORD = "168"
-else:
-    CURRENT_PASSWORD = "1357"
+CURRENT_PASSWORD = "168" if now_cst >= switch_time else "1357"
 
 if st.session_state["step"] == "login":
     st.markdown("### 🔐 台灣彩券數據中心授權")
@@ -55,7 +50,7 @@ if st.session_state["step"] == "login":
         if pwd == CURRENT_PASSWORD:
             st.session_state["step"] = "decrypting"; st.rerun()
         else:
-            st.error(f"授權失敗 (請輸入當前時段密碼)")
+            st.error(f"授權失敗 (目前密碼已變更為新時段碼)")
 
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
@@ -63,7 +58,7 @@ elif st.session_state["step"] == "decrypting":
     for i in range(11):
         lines = ["".join([random.choice(chars) for _ in range(25)]) for _ in range(5)]
         hack_output = "\n".join([f"## {line}" for line in lines])
-        placeholder.markdown(f"{hack_output}\n\n**核心權重演算中... {i*10}%**")
+        placeholder.markdown(f"{hack_output}\n\n**全域穩定度演算中... {i*10}%**")
         time.sleep(0.08)
     st.session_state["step"] = "result"; st.rerun()
 
@@ -72,37 +67,31 @@ elif st.session_state["step"] == "result":
     st.write(f"預測生成時間 (中原時間): {dynamic_time_display}")
     
     try:
-        # --- 預測邏輯 ---
+        # --- AI 預測核心邏輯 ---
         df = pd.read_csv('history539.csv')
         actual_count = len(df)
         st.markdown(f"<div class='history-text'>📡 成功解析 {actual_count} 期歷史數據 | 穩定度算法完成</div>", unsafe_allow_html=True)
 
-        # --- 重要：鎖定 2/4 號碼維持與 2/3 相同 ---
-        # 如果日期是 2/4，我們強制讓種子使用 2/3 的數值
-        if now_cst.month == 2 and now_cst.day == 4:
-            np.random.seed(20260203)
-        else:
-            np.random.seed(int(now_cst.strftime("%Y%m%d")))
+        # 鎖定當日種子
+        np.random.seed(int(now_cst.strftime("%Y%m%d")))
         
-        # 1. 數據分佈統計
+        # 1. 歷史頻率分析
         all_nums = df[['n1', 'n2', 'n3', 'n4', 'n5']].values.flatten()
         counts = pd.Series(all_nums).value_counts(normalize=True)
         
-        # 2. 篩選排除昨日獎號後的池子
+        # 2. 排除昨日獎號
         last_nums = df.iloc[0][['n1', 'n2', 'n3', 'n4', 'n5']].values.astype(int)
         pool = [i for i in range(1, 40) if i not in last_nums]
         
-        # 3. 執行穩定度抽樣 (加權推算)
+        # 3. 穩定度加權抽樣
         weights = [counts.get(i, 0.02) for i in pool]
         picks = sorted(np.random.choice(pool, 5, p=np.array(weights)/sum(weights), replace=False))
         
-        # 4. 依照大小排列並分配 (2專車, 3連碰)
         sv_display = f"{str(picks[0]).zfill(2)}, {str(picks[1]).zfill(2)}"
         jt_display = f"{str(picks[2]).zfill(2)}, {str(picks[3]).zfill(2)}, {str(picks[4]).zfill(2)}"
 
-    except Exception as e:
-        sv_display = "05, 12"
-        jt_display = "18, 27, 34"
+    except:
+        sv_display = "08, 19"; jt_display = "12, 25, 36"
         st.markdown("<div class='history-text'>📡 雲端數據同步中...</div>", unsafe_allow_html=True)
 
     # --- 垂直結果排版 ---
