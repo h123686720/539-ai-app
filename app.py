@@ -18,7 +18,7 @@ st.markdown(f"""
     .stApp {{ background-color: black; }}
     header {{visibility: hidden;}}
     .main .block-container {{ max-width: 600px; padding: 1rem; }}
-    .nvidia-title {{ width: 100%; border: 2px solid #76b900; padding: 15px; text-align: center; font-size: 30px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 15px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
+    .nvidia-title {{ width: 100%; border: 3px solid #76b900; padding: 15px; text-align: center; font-size: 30px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 15px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
     .stApp, h1, h2, h3, p, div, label, span {{ color: #00FF41 !important; text-align: center; }}
     .res-box {{ 
         border: 2px solid #76b900; 
@@ -50,7 +50,7 @@ if st.session_state["step"] == "login":
         if pwd == CURRENT_PASSWORD:
             st.session_state["step"] = "decrypting"; st.rerun()
         else:
-            st.error(f"授權失敗 (請檢查當前時段密碼)")
+            st.error(f"授權失敗 (目前密碼為新時段代碼)")
 
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
@@ -58,7 +58,7 @@ elif st.session_state["step"] == "decrypting":
     for i in range(11):
         lines = ["".join([random.choice(chars) for _ in range(25)]) for _ in range(5)]
         hack_output = "\n".join([f"## {line}" for line in lines])
-        placeholder.markdown(f"{hack_output}\n\n**核心權重演算中... {i*10}%**")
+        placeholder.markdown(f"{hack_output}\n\n**AI 全域權重演算中... {i*10}%**")
         time.sleep(0.08)
     st.session_state["step"] = "result"; st.rerun()
 
@@ -67,30 +67,32 @@ elif st.session_state["step"] == "result":
     st.write(f"預測生成時間 (中原時間): {dynamic_time_display}")
     
     try:
-        # --- AI 預測邏輯 (用於連碰) ---
+        # --- AI 全自動預測邏輯 ---
         df = pd.read_csv('history539.csv')
         actual_count = len(df)
         st.markdown(f"<div class='history-text'>📡 成功解析 {actual_count} 期歷史數據 | 穩定度算法完成</div>", unsafe_allow_html=True)
 
+        # 鎖定當日種子
         np.random.seed(int(now_cst.strftime("%Y%m%d")))
+        
+        # 1. 歷史頻率分析
         all_nums = df[['n1', 'n2', 'n3', 'n4', 'n5']].values.flatten()
         counts = pd.Series(all_nums).value_counts(normalize=True)
+        
+        # 2. 篩選排除昨日獎號
         last_nums = df.iloc[0][['n1', 'n2', 'n3', 'n4', 'n5']].values.astype(int)
+        pool = [i for i in range(1, 40) if i not in last_nums]
         
-        # 排除 27, 28 以免連碰重複
-        pool = [i for i in range(1, 40) if i not in last_nums and i not in [27, 28]]
-        
+        # 3. 執行加權抽樣
         weights = [counts.get(i, 0.02) for i in pool]
-        picks = sorted(np.random.choice(pool, 3, p=np.array(weights)/sum(weights), replace=False))
+        picks = sorted(np.random.choice(pool, 5, p=np.array(weights)/sum(weights), replace=False))
         
-        # --- 專車固定為 27, 28 ---
-        sv_display = "27, 28"
-        # --- 連碰由預測產生 ---
-        jt_display = f"{str(picks[0]).zfill(2)}, {str(picks[1]).zfill(2)}, {str(picks[2]).zfill(2)}"
+        # 4. 分配號碼 (前2為專車，後3為連碰)
+        sv_display = f"{str(picks[0]).zfill(2)}, {str(picks[1]).zfill(2)}"
+        jt_display = f"{str(picks[2]).zfill(2)}, {str(picks[3]).zfill(2)}, {str(picks[4]).zfill(2)}"
 
     except:
-        sv_display = "27, 28"
-        jt_display = "11, 22, 33"
+        sv_display = "08, 19"; jt_display = "12, 25, 36"
         st.markdown("<div class='history-text'>📡 雲端數據同步中...</div>", unsafe_allow_html=True)
 
     # --- 垂直結果排版 ---
