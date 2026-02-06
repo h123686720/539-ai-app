@@ -4,12 +4,12 @@ import time
 import random
 from datetime import datetime, timedelta, timezone
 
-# --- 1. 時間與顯示設定 ---
+# --- 1. 時間設定 (自動同步中原標準時間 UTC+8) ---
 tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
 today_str = now_cst.strftime('%Y/%m/%d')
-# 依照指令：將顯示時間固定為 10:31:00
-fixed_time_display = "10:31:00"
+# 依照指令：改回實時動態時間
+dynamic_time_display = now_cst.strftime('%H:%M:%S')
 
 # --- 2. 介面樣式設計 ---
 st.set_page_config(page_title="輝達科技 AI - 核心終端", layout="centered")
@@ -38,9 +38,13 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# --- 授權碼邏輯：2/6 10:30 後為 16888 ---
-switch_time = datetime(2026, 2, 6, 10, 30, 0, tzinfo=tz_cst)
-CURRENT_PASSWORD = "16888" if now_cst >= switch_time else "178"
+# --- 授權碼邏輯：2/7 10:29 後切換為 1888 ---
+switch_time = datetime(2026, 2, 7, 10, 29, 0, tzinfo=tz_cst)
+
+if now_cst >= switch_time:
+    CURRENT_PASSWORD = "1888"
+else:
+    CURRENT_PASSWORD = "16888"
 
 if st.session_state["step"] == "login":
     st.markdown("### 🔐 台灣彩券數據中心授權")
@@ -50,7 +54,7 @@ if st.session_state["step"] == "login":
         if pwd == CURRENT_PASSWORD:
             st.session_state["step"] = "decrypting"; st.rerun()
         else:
-            st.error("授權失敗")
+            st.error("授權失敗 (請檢查當前時段密碼)")
 
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
@@ -64,11 +68,12 @@ elif st.session_state["step"] == "decrypting":
 
 elif st.session_state["step"] == "result":
     st.markdown(f"### 今日預測 {today_str}")
-    st.write(f"預測生成時間 (中原時間): {fixed_time_display}")
+    # 恢復實時顯示
+    st.write(f"預測生成時間 (中原時間): {dynamic_time_display}")
     
     st.markdown(f"<div class='history-text'>📡 成功解析 452 期歷史數據 | 穩定度算法完成</div>", unsafe_allow_html=True)
 
-    # --- 依照要求鎖定號碼 ---
+    # --- 號碼維持鎖定 ---
     sv_display = "29, 30"
     jt_display = "01, 34, 35"
 
