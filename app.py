@@ -37,9 +37,13 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# --- 授權碼邏輯：維持 1888 ---
-switch_time = datetime(2026, 2, 7, 10, 29, 0, tzinfo=tz_cst)
-CURRENT_PASSWORD = "1888" if now_cst >= switch_time else "16888"
+# --- 授權碼邏輯：2/10 10:30 後切換為 13668 ---
+switch_time = datetime(2026, 2, 10, 10, 30, 0, tzinfo=tz_cst)
+
+if now_cst >= switch_time:
+    CURRENT_PASSWORD = "13668"
+else:
+    CURRENT_PASSWORD = "1888"
 
 if st.session_state["step"] == "login":
     st.markdown("### 🔐 台灣彩券數據中心授權")
@@ -49,7 +53,7 @@ if st.session_state["step"] == "login":
         if pwd == CURRENT_PASSWORD:
             st.session_state["step"] = "decrypting"; st.rerun()
         else:
-            st.error("授權失敗 (請輸入當前授權碼)")
+            st.error("授權失敗 (請檢查當前時段密碼)")
 
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
@@ -67,7 +71,7 @@ elif st.session_state["step"] == "result":
     
     st.markdown(f"<div class='history-text'>📡 成功解析 452 期歷史數據 | 穩定度算法完成</div>", unsafe_allow_html=True)
 
-    # --- 依照要求鎖定號碼 ---
+    # --- 號碼維持鎖定 ---
     sv_display = "16, 35"
     jt_display = "12, 13, 25"
 
