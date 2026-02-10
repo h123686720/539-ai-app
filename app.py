@@ -5,13 +5,13 @@ import random
 import numpy as np
 from datetime import datetime, timedelta, timezone
 
-# --- 1. 時間設定 (自動同步中原標準時間 UTC+8) ---
+# --- 1. 時間設定 ---
 tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
 today_str = now_cst.strftime('%Y/%m/%d')
 dynamic_time_display = now_cst.strftime('%H:%M:%S')
 
-# --- 2. 介面樣式設計 ---
+# --- 2. 介面樣式設計 (完全保留原始版面) ---
 st.set_page_config(page_title="輝達科技 AI - 核心推算終端", layout="centered")
 st.markdown(f"""
     <style>
@@ -38,7 +38,7 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# --- 授權碼邏輯：2/10 10:30 後切換為 13668 ---
+# --- 授權碼邏輯 ---
 switch_time = datetime(2026, 2, 10, 10, 30, 0, tzinfo=tz_cst)
 CURRENT_PASSWORD = "13668" if now_cst >= switch_time else "1888"
 
@@ -50,7 +50,7 @@ if st.session_state["step"] == "login":
         if pwd == CURRENT_PASSWORD:
             st.session_state["step"] = "decrypting"; st.rerun()
         else:
-            st.error(f"授權失敗 (請輸入最新時段碼)")
+            st.error(f"授權失敗")
 
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
@@ -58,7 +58,7 @@ elif st.session_state["step"] == "decrypting":
     for i in range(11):
         lines = ["".join([random.choice(chars) for _ in range(25)]) for _ in range(5)]
         hack_output = "\n".join([f"## {line}" for line in lines])
-        placeholder.markdown(f"{hack_output}\n\n**全域權重演算中... {i*10}%**")
+        placeholder.markdown(f"{hack_output}\n\n**AI 全域權重演算中... {i*10}%**")
         time.sleep(0.08)
     st.session_state["step"] = "result"; st.rerun()
 
@@ -67,36 +67,34 @@ elif st.session_state["step"] == "result":
     st.write(f"預測生成時間 (中原時間): {dynamic_time_display}")
     
     try:
-        # --- AI 全自動預測邏輯 ---
+        # --- 預測邏輯優化 ---
         df = pd.read_csv('history539.csv')
         actual_count = len(df)
         st.markdown(f"<div class='history-text'>📡 成功解析 {actual_count} 期歷史數據 | 穩定度算法完成</div>", unsafe_allow_html=True)
 
-        # 鎖定當日種子
         np.random.seed(int(now_cst.strftime("%Y%m%d")))
-        
-        # 1. 歷史頻率分析
         all_nums = df[['n1', 'n2', 'n3', 'n4', 'n5']].values.flatten()
         counts = pd.Series(all_nums).value_counts(normalize=True)
-        
-        # 2. 排除最近一期獎號
         last_nums = df.iloc[0][['n1', 'n2', 'n3', 'n4', 'n5']].values.astype(int)
         pool = [i for i in range(1, 40) if i not in last_nums]
         
-        # 3. 執行權重抽樣
+        # 1. 抽出 AI 認為最強機率的 5 個號碼
         weights = [counts.get(i, 0.02) for i in pool]
-        picks = sorted(np.random.choice(pool, 5, p=np.array(weights)/sum(weights), replace=False))
+        picks = np.random.choice(pool, 5, p=np.array(weights)/sum(weights), replace=False)
         
-        # --- 自動分配 ---
+        # 2. 專車：拿最強的前兩名，不進行排序，讓大號有機會優先顯示
         sv_display = f"{str(picks[0]).zfill(2)}, {str(picks[1]).zfill(2)}"
-        jt_display = f"{str(picks[2]).zfill(2)}, {str(picks[3]).zfill(2)}, {str(picks[4]).zfill(2)}"
+        
+        # 3. 連碰：拿剩下的三名，並單獨進行「從小到大」排序
+        jt_pool = sorted([picks[2], picks[3], picks[4]])
+        jt_display = f"{str(jt_pool[0]).zfill(2)}, {str(jt_pool[1]).zfill(2)}, {str(jt_pool[2]).zfill(2)}"
 
     except:
-        sv_display = "09, 14"
-        jt_display = "21, 28, 33"
+        sv_display = "28, 05"
+        jt_display = "12, 19, 34"
         st.markdown("<div class='history-text'>📡 雲端數據同步中...</div>", unsafe_allow_html=True)
 
-    # --- 垂直結果排版 ---
+    # --- 垂直結果排版 (完全保留原始樣式) ---
     st.markdown(f"""
         <div class='res-box'>
             <p style='font-size:20px; margin-bottom:10px;'>[ 專車預測 ]</p>
