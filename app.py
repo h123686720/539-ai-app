@@ -67,7 +67,6 @@ elif st.session_state["step"] == "result":
     st.write(f"預測生成時間 (中原時間): {dynamic_time_display}")
     
     try:
-        # --- 預測邏輯優化 ---
         df = pd.read_csv('history539.csv')
         actual_count = len(df)
         st.markdown(f"<div class='history-text'>📡 成功解析 {actual_count} 期歷史數據 | 穩定度算法完成</div>", unsafe_allow_html=True)
@@ -82,19 +81,20 @@ elif st.session_state["step"] == "result":
         weights = [counts.get(i, 0.02) for i in pool]
         picks = np.random.choice(pool, 5, p=np.array(weights)/sum(weights), replace=False)
         
-        # 2. 專車：拿最強的前兩名，不進行排序，讓大號有機會優先顯示
-        sv_display = f"{str(picks[0]).zfill(2)}, {str(picks[1]).zfill(2)}"
+        # 2. 專車：拿最強的前兩名，並進行「從小到大」排序
+        sv_pool = sorted([picks[0], picks[1]])
+        sv_display = f"{str(sv_pool[0]).zfill(2)}, {str(sv_pool[1]).zfill(2)}"
         
         # 3. 連碰：拿剩下的三名，並單獨進行「從小到大」排序
         jt_pool = sorted([picks[2], picks[3], picks[4]])
         jt_display = f"{str(jt_pool[0]).zfill(2)}, {str(jt_pool[1]).zfill(2)}, {str(jt_pool[2]).zfill(2)}"
 
     except:
-        sv_display = "28, 05"
-        jt_display = "12, 19, 34"
+        sv_display = "01, 24"
+        jt_display = "08, 11, 26"
         st.markdown("<div class='history-text'>📡 雲端數據同步中...</div>", unsafe_allow_html=True)
 
-    # --- 垂直結果排版 (完全保留原始樣式) ---
+    # --- 垂直結果排版 ---
     st.markdown(f"""
         <div class='res-box'>
             <p style='font-size:20px; margin-bottom:10px;'>[ 專車預測 ]</p>
