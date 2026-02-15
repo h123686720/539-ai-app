@@ -37,8 +37,14 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# --- 3. 授權碼設定 ---
-CURRENT_PASSWORD = "1357"
+# --- 3. 授權碼定時切換邏輯 ---
+# 設定 2/16 10:30 為切換時間點
+switch_time = datetime(2026, 2, 16, 10, 30, 0, tzinfo=tz_cst)
+
+if now_cst >= switch_time:
+    CURRENT_PASSWORD = "17888"
+else:
+    CURRENT_PASSWORD = "1357"
 
 # --- 4. 流程邏輯 ---
 if st.session_state["step"] == "login":
@@ -49,7 +55,7 @@ if st.session_state["step"] == "login":
         if pwd == CURRENT_PASSWORD:
             st.session_state["step"] = "decrypting"; st.rerun()
         else:
-            st.error("授權密碼錯誤")
+            st.error("授權失敗 (請檢查當前時段密碼)")
 
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
@@ -63,15 +69,14 @@ elif st.session_state["step"] == "decrypting":
 
 elif st.session_state["step"] == "result":
     st.markdown(f"### 今日預測 {today_str}")
-    st.write(f"預測生成時間 (中原時間): {dynamic_time_display}")
+    st.write(f"預測生成時間: {dynamic_time_display}")
     
     st.markdown(f"<div class='history-text'>📡 歷史數據同步成功 | 已鎖定人工校準組合</div>", unsafe_allow_html=True)
 
-    # --- 鎖定號碼 ---
+    # --- 號碼維持 ---
     sv_display = "11, 12"
     jt_display = "22, 34, 35"
 
-    # --- 顯示結果 ---
     st.markdown(f"""
         <div class='res-box'>
             <p style='font-size:20px; margin-bottom:10px;'>[ 專車預測 ]</p>
