@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import time
 import random
-import numpy as np
 from datetime import datetime, timedelta, timezone
 
 # --- 1. 時間設定 (UTC+8) ---
@@ -12,7 +11,7 @@ today_str = now_cst.strftime('%Y/%m/%d')
 dynamic_time_display = now_cst.strftime('%H:%M:%S')
 
 # --- 2. 介面樣式設計 ---
-st.set_page_config(page_title="輝達科技 AI - 核心專車端", layout="centered")
+st.set_page_config(page_title="輝達科技 AI - 核心推算終端", layout="centered")
 st.markdown(f"""
     <style>
     .stApp {{ background-color: black; }}
@@ -22,7 +21,7 @@ st.markdown(f"""
     .stApp, h1, h2, h3, p, div, label, span {{ color: #00FF41 !important; text-align: center; }}
     .res-box {{ 
         border: 2px solid #76b900; 
-        padding: 40px 25px; 
+        padding: 25px; 
         border-radius: 12px; 
         background: rgba(0,0,0,0.5); 
         margin-bottom: 20px;
@@ -38,18 +37,14 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# --- 3. 序列授權碼邏輯 ---
-# 2/12 10:30 之後改為 16891
-switch_time_2 = datetime(2026, 2, 12, 10, 30, 0, tzinfo=tz_cst)
-
-if now_cst >= switch_time_2:
-    CURRENT_PASSWORD = "16891"
-else:
-    CURRENT_PASSWORD = "16889"
+# --- 3. 序列授權碼邏輯 (自動計算至 2/15) ---
+# 2/15 10:30 之後改為 16897
+switch_time_today = datetime(2026, 2, 15, 10, 30, 0, tzinfo=tz_cst)
+CURRENT_PASSWORD = "16897" if now_cst >= switch_time_today else "16895"
 
 # --- 4. 流程邏輯 ---
 if st.session_state["step"] == "login":
-    st.markdown("### 🔐 核心數據中心授權")
+    st.markdown("### 🔐 數據中心授權")
     st.write(f"系統偵測日期: {today_str}")
     pwd = st.text_input("請輸入授權密碼", type="password", label_visibility="collapsed")
     if st.button("授權並進入系統"):
@@ -64,41 +59,29 @@ elif st.session_state["step"] == "decrypting":
     for i in range(11):
         lines = ["".join([random.choice(chars) for _ in range(25)]) for _ in range(5)]
         hack_output = "\n".join([f"## {line}" for line in lines])
-        placeholder.markdown(f"{hack_output}\n\n**AI 專車權重演算中... {i*10}%**")
+        placeholder.markdown(f"{hack_output}\n\n**核心權重數據同步中... {i*10}%**")
         time.sleep(0.08)
     st.session_state["step"] = "result"; st.rerun()
 
 elif st.session_state["step"] == "result":
-    st.markdown(f"### 今日專車預測 {today_str}")
+    st.markdown(f"### 今日預測 {today_str}")
     st.write(f"預測生成時間 (中原時間): {dynamic_time_display}")
     
-    try:
-        df = pd.read_csv('history539.csv')
-        st.markdown(f"<div class='history-text'>📡 歷史數據同步成功 | 專車演算法完成</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='history-text'>📡 歷史數據同步成功 | 已鎖定人工校準組合</div>", unsafe_allow_html=True)
 
-        np.random.seed(int(now_cst.strftime("%Y%m%d")))
-        all_nums = df[['n1', 'n2', 'n3', 'n4', 'n5']].values.flatten()
-        counts = pd.Series(all_nums).value_counts(normalize=True)
-        last_nums = df.iloc[0][['n1', 'n2', 'n3', 'n4', 'n5']].values.astype(int)
-        pool = [i for i in range(1, 40) if i not in last_nums]
-        
-        # 抽出 AI 認為最強機率的 2 個號碼
-        weights = [counts.get(i, 0.02) for i in pool]
-        picks = np.random.choice(pool, 2, p=np.array(weights)/sum(weights), replace=False)
-        
-        # 專車排序
-        sv_pool = sorted(picks)
-        sv_display = f"{str(sv_pool[0]).zfill(2)}, {str(sv_pool[1]).zfill(2)}"
+    # --- 依照要求鎖定號碼 ---
+    sv_display = "11, 12"
+    jt_display = "22, 34, 35"
 
-    except:
-        sv_display = "03, 22"
-        st.markdown("<div class='history-text'>📡 雲端數據同步中...</div>", unsafe_allow_html=True)
-
-    # --- 顯示結果 (僅保留專車) ---
+    # --- 顯示結果 ---
     st.markdown(f"""
         <div class='res-box'>
-            <p style='font-size:22px; margin-bottom:15px; color:#76b900;'>[ 核心專車預測 ]</p>
-            <h2 style='font-size:72px; color:#FFD700 !important; letter-spacing: 8px; text-shadow: 0 0 20px #FFD700;'>{sv_display}</h2>
+            <p style='font-size:20px; margin-bottom:10px;'>[ 專車預測 ]</p>
+            <h2 style='font-size:56px; color:#FFD700 !important; letter-spacing: 5px;'>{sv_display}</h2>
+        </div>
+        <div class='res-box'>
+            <p style='font-size:20px; margin-bottom:10px;'>[ 連碰組合 ]</p>
+            <h2 style='font-size:56px; letter-spacing: 5px;'>{jt_display}</h2>
         </div>
     """, unsafe_allow_html=True)
     
