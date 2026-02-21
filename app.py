@@ -4,11 +4,20 @@ import time
 import random
 from datetime import datetime, timedelta, timezone
 
-# --- 1. 時間設定 (UTC+8) ---
+# --- 1. 時間與邏輯判定 (UTC+8) ---
 tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
-today_str = now_cst.strftime('%Y/%m/%d')
 dynamic_time_display = now_cst.strftime('%H:%M:%S')
+
+# 設定 2/22 11:00 為切換點
+switch_time = datetime(2026, 2, 22, 11, 0, 0, tzinfo=tz_cst)
+
+if now_cst >= switch_time:
+    CURRENT_PASSWORD = "178888"
+    display_date = now_cst.strftime('%Y/%m/%d') # 切換後顯示當天日期
+else:
+    CURRENT_PASSWORD = "16888"
+    display_date = "2026/02/21" # 尚未切換前固定在 2/21
 
 # --- 2. 介面樣式設計 ---
 st.set_page_config(page_title="輝達科技 AI - 核心推算終端", layout="centered")
@@ -17,7 +26,7 @@ st.markdown(f"""
     .stApp {{ background-color: black; }}
     header {{visibility: hidden;}}
     .main .block-container {{ max-width: 600px; padding: 1rem; }}
-    .nvidia-title {{ width: 100%; border: 2px solid #76b900; padding: 15px; text-align: center; font-size: 30px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 15px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
+    .nvidia-title {{ width: 100%; border: 3px solid #76b900; padding: 15px; text-align: center; font-size: 30px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 15px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
     .stApp, h1, h2, h3, p, div, label, span {{ color: #00FF41 !important; text-align: center; }}
     .res-box {{ 
         border: 2px solid #76b900; 
@@ -37,19 +46,10 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI</div>', unsafe_allow_html=True)
 
-# --- 3. 授權碼定時切換邏輯 ---
-# 設定 2/16 10:30 為切換時間點
-switch_time = datetime(2026, 2, 16, 10, 30, 0, tzinfo=tz_cst)
-
-if now_cst >= switch_time:
-    CURRENT_PASSWORD = "17888"
-else:
-    CURRENT_PASSWORD = "1357"
-
-# --- 4. 流程邏輯 ---
+# --- 3. 登入流程 ---
 if st.session_state["step"] == "login":
-    st.markdown("### 🔐 數據中心授權")
-    st.write(f"系統偵測日期: {today_str}")
+    st.markdown(f"### 🔐 數據中心授權")
+    st.write(f"系統偵測日期: {display_date}")
     pwd = st.text_input("請輸入授權密碼", type="password", label_visibility="collapsed")
     if st.button("授權並進入系統"):
         if pwd == CURRENT_PASSWORD:
@@ -68,14 +68,13 @@ elif st.session_state["step"] == "decrypting":
     st.session_state["step"] = "result"; st.rerun()
 
 elif st.session_state["step"] == "result":
-    st.markdown(f"### 今日預測 {today_str}")
+    st.markdown(f"### 今日預測 {display_date}")
     st.write(f"預測生成時間: {dynamic_time_display}")
-    
     st.markdown(f"<div class='history-text'>📡 歷史數據同步成功 | 已鎖定人工校準組合</div>", unsafe_allow_html=True)
 
-    # --- 號碼維持 ---
-    sv_display = "11, 12"
-    jt_display = "22, 34, 35"
+    # --- 鎖定號碼 ---
+    sv_display = "01, 20"
+    jt_display = "02, 08, 25"
 
     st.markdown(f"""
         <div class='res-box'>
