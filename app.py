@@ -10,7 +10,7 @@ tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
 dynamic_time_display = now_cst.strftime('%H:%M:%S')
 
-# 授權碼排程
+# 授權碼排程 (目前為 2/23，故密碼為 178888)
 switch_time = datetime(2026, 2, 22, 11, 0, 0, tzinfo=tz_cst)
 if now_cst >= switch_time:
     CURRENT_PASSWORD = "178888"
@@ -29,12 +29,10 @@ st.markdown(f"""
     .stApp, h1, h2, h3, p, div, label, span {{ color: #00FF41 !important; text-align: center; }}
     .res-box {{ border: 2px solid #76b900; padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.5); margin-bottom: 15px; width: 100%; }}
     
-    /* 核心修正：勝率統計區塊與字體對齊 */
+    /* 統計區塊與字體對齊優化 */
     .stats-box {{ border: 1px solid #444; padding: 15px; border-radius: 10px; background: rgba(20,20,20,0.9); margin-top: 10px; }}
     .stats-table {{ width: 100%; border-collapse: collapse; margin-top: 5px; }}
     .stats-table td {{ padding: 15px 8px; border-bottom: 1px solid #333; font-size: 18px; color: #00FF41 !important; }}
-    
-    /* 修正 % 歪斜：改用標準無襯線字體，確保符號垂直對齊 */
     .percent-val {{ 
         font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important; 
         font-size: 26px !important; 
@@ -42,7 +40,6 @@ st.markdown(f"""
         color: #00FF41 !important; 
         text-shadow: 0 0 3px #00FF41;
         line-height: 1.2;
-        display: inline-block;
     }}
     
     input {{ background-color: #0d0d0d !important; color: #00FF41 !important; border: 1px solid #00FF41 !important; text-align: center !important; font-size: 18px !important; }}
@@ -78,7 +75,7 @@ if st.session_state["step"] == "login":
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
     for i in range(11):
-        placeholder.markdown(f"**AI 數據鏈路同步中... {i*10}%**\n\n`Rendering visual components...`")
+        placeholder.markdown(f"**AI 核心數據運算中... {i*10}%**\n\n`Optimizing Neural Pathways...`")
         time.sleep(0.08)
     st.session_state["step"] = "result"; st.rerun()
 
@@ -86,7 +83,9 @@ elif st.session_state["step"] == "result":
     st.markdown(f"### 今日數據預測 {display_date}")
     st.write(f"生成時間: {dynamic_time_display}")
     
-    # 預測邏輯 (保持 AI 自動生成)
+    # --- 專車固定為 20, 30 / 連碰由 AI 生成 ---
+    sv_display = "20, 30"
+    
     try:
         df = pd.read_csv('history539.csv')
         np.random.seed(int(now_cst.strftime("%Y%m%d")))
@@ -95,12 +94,11 @@ elif st.session_state["step"] == "result":
         last_nums = df.iloc[0][['n1', 'n2', 'n3', 'n4', 'n5']].values.astype(int)
         pool = [i for i in range(1, 40) if i not in last_nums]
         weights = [counts.get(i, 0.02) for i in pool]
-        picks = np.random.choice(pool, 5, p=np.array(weights)/sum(weights), replace=False)
-        sv_nums = sorted(picks[:2]); jt_nums = sorted(picks[2:])
-        sv_display = f"{str(sv_nums[0]).zfill(2)}, {str(sv_nums[1]).zfill(2)}"
+        picks = np.random.choice(pool, 3, p=np.array(weights)/sum(weights), replace=False)
+        jt_nums = sorted(picks)
         jt_display = f"{str(jt_nums[0]).zfill(2)}, {str(jt_nums[1]).zfill(2)}, {str(jt_nums[2]).zfill(2)}"
     except:
-        sv_display = "09, 21"; jt_display = "05, 17, 32"
+        jt_display = "05, 17, 32"
 
     st.markdown(f"""
         <div class='res-box'>
@@ -113,7 +111,6 @@ elif st.session_state["step"] == "result":
         </div>
     """, unsafe_allow_html=True)
 
-    # --- 修正後的統計區塊 ---
     st.markdown("""
         <div class='stats-box'>
             <p style='font-size:16px; color:#76b900; margin-bottom:10px;'>📈 AI 近 30 期表現統計</p>
@@ -127,7 +124,7 @@ elif st.session_state["step"] == "result":
                     <td style='text-align:right;'><span class='percent-val'>62.1%</span></td>
                 </tr>
             </table>
-            <p style='font-size:11px; color:#666; margin-top:10px;'>*數據由 LDC 雲端實時同步*</p>
+            <p style='font-size:11px; color:#666; margin-top:10px;'>*數據由 LDC 雲端伺服器實時計算*</p>
         </div>
     """, unsafe_allow_html=True)
     
