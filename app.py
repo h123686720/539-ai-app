@@ -8,7 +8,6 @@ from datetime import datetime, timedelta, timezone
 # --- 1. 時間與邏輯判定 (UTC+8) ---
 tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
-dynamic_time_display = now_cst.strftime('%H:%M:%S')
 
 # 授權碼切換排程：2026/02/24 11:00:00
 switch_time = datetime(2026, 2, 24, 11, 0, 0, tzinfo=tz_cst)
@@ -19,6 +18,9 @@ if now_cst >= switch_time:
 else:
     CURRENT_PASSWORD = "178888" # 目前使用的密碼
     display_date = "2026/02/23" # 2/24 11:00 前固定顯示 2/23
+
+# 固定生成時間
+static_time_display = "11:12:00"
 
 # --- 2. 介面樣式設計 ---
 st.set_page_config(page_title="數據分析終端", layout="centered")
@@ -75,17 +77,18 @@ if st.session_state["step"] == "login":
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
     for i in range(11):
-        placeholder.markdown(f"**AI 核心數據運算中... {i*10}%**\n\n`Establishing Secure Connection...`")
+        placeholder.markdown(f"**AI 數據核心解析中... {i*10}%**\n\n`Timestamp Synchronizing...`")
         time.sleep(0.08)
     st.session_state["step"] = "result"; st.rerun()
 
 elif st.session_state["step"] == "result":
     st.markdown(f"### 今日數據預測 {display_date}")
-    st.write(f"生成時間: {dynamic_time_display}")
+    # 這裡顯示固定的 11:12:00
+    st.write(f"生成時間: {static_time_display}")
     
-    # --- 號碼完全鎖定 ---
-    sv_display = "10, 36"       # 專車
-    jt_display = "03, 12, 27"   # 連碰
+    # 號碼鎖定
+    sv_display = "10, 36"       
+    jt_display = "03, 12, 27"   
 
     st.markdown(f"""
         <div class='res-box'>
@@ -111,7 +114,7 @@ elif st.session_state["step"] == "result":
                     <td style='text-align:right;'><span class='percent-val'>62.1%</span></td>
                 </tr>
             </table>
-            <p style='font-size:11px; color:#666; margin-top:10px;'>*數據由 LDC 雲端伺服器實時計算*</p>
+            <p style='font-size:11px; color:#666; margin-top:10px;'>*數據由 LDC 伺服器於今日 11:12 結算完成*</p>
         </div>
     """, unsafe_allow_html=True)
     
