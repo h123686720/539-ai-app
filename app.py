@@ -10,14 +10,15 @@ tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
 dynamic_time_display = now_cst.strftime('%H:%M:%S')
 
-# 授權碼排程 (目前為 2/23，故密碼為 178888)
-switch_time = datetime(2026, 2, 22, 11, 0, 0, tzinfo=tz_cst)
+# 授權碼切換排程：2026/02/24 11:00:00
+switch_time = datetime(2026, 2, 24, 11, 0, 0, tzinfo=tz_cst)
+
 if now_cst >= switch_time:
-    CURRENT_PASSWORD = "178888"
-    display_date = now_cst.strftime('%Y/%m/%d')
+    CURRENT_PASSWORD = "165757" # 2/24 11:00 後的新密碼
+    display_date = now_cst.strftime('%Y/%m/%d') # 切換後顯示當天日期
 else:
-    CURRENT_PASSWORD = "16888"
-    display_date = "2026/02/21"
+    CURRENT_PASSWORD = "178888" # 目前使用的密碼
+    display_date = "2026/02/23" # 2/24 11:00 前固定顯示 2/23
 
 # --- 2. 介面樣式設計 ---
 st.set_page_config(page_title="數據分析終端", layout="centered")
@@ -29,7 +30,6 @@ st.markdown(f"""
     .stApp, h1, h2, h3, p, div, label, span {{ color: #00FF41 !important; text-align: center; }}
     .res-box {{ border: 2px solid #76b900; padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.5); margin-bottom: 15px; width: 100%; }}
     
-    /* 統計區塊與字體對齊優化 */
     .stats-box {{ border: 1px solid #444; padding: 15px; border-radius: 10px; background: rgba(20,20,20,0.9); margin-top: 10px; }}
     .stats-table {{ width: 100%; border-collapse: collapse; margin-top: 5px; }}
     .stats-table td {{ padding: 15px 8px; border-bottom: 1px solid #333; font-size: 18px; color: #00FF41 !important; }}
@@ -75,7 +75,7 @@ if st.session_state["step"] == "login":
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
     for i in range(11):
-        placeholder.markdown(f"**AI 核心數據運算中... {i*10}%**\n\n`Optimizing Neural Pathways...`")
+        placeholder.markdown(f"**AI 核心數據運算中... {i*10}%**\n\n`Establishing Secure Connection...`")
         time.sleep(0.08)
     st.session_state["step"] = "result"; st.rerun()
 
@@ -83,22 +83,9 @@ elif st.session_state["step"] == "result":
     st.markdown(f"### 今日數據預測 {display_date}")
     st.write(f"生成時間: {dynamic_time_display}")
     
-    # --- 專車固定為 20, 30 / 連碰由 AI 生成 ---
-    sv_display = "20, 30"
-    
-    try:
-        df = pd.read_csv('history539.csv')
-        np.random.seed(int(now_cst.strftime("%Y%m%d")))
-        all_nums = df[['n1', 'n2', 'n3', 'n4', 'n5']].values.flatten()
-        counts = pd.Series(all_nums).value_counts(normalize=True)
-        last_nums = df.iloc[0][['n1', 'n2', 'n3', 'n4', 'n5']].values.astype(int)
-        pool = [i for i in range(1, 40) if i not in last_nums]
-        weights = [counts.get(i, 0.02) for i in pool]
-        picks = np.random.choice(pool, 3, p=np.array(weights)/sum(weights), replace=False)
-        jt_nums = sorted(picks)
-        jt_display = f"{str(jt_nums[0]).zfill(2)}, {str(jt_nums[1]).zfill(2)}, {str(jt_nums[2]).zfill(2)}"
-    except:
-        jt_display = "05, 17, 32"
+    # --- 號碼完全鎖定 ---
+    sv_display = "10, 36"       # 專車
+    jt_display = "03, 12, 27"   # 連碰
 
     st.markdown(f"""
         <div class='res-box'>
