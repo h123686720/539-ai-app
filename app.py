@@ -41,10 +41,15 @@ st.markdown('<div class="nvidia-title">輝達科技 AI - 核心數據終端</div
 
 # --- 3. 流程控制 ---
 if st.session_state["step"] == "login":
-    # --- 分段顯示標題 ---
+    # --- 分段顯示標題，圖片在上方 ---
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        # 使用提供的圖片替換鑰匙，並放在標題上方
+        st.image("image_3.png", use_column_width=True) 
+    
     st.markdown(f"""
         <div style='margin-bottom: 20px;'>
-            <h2 style='color: #00FF41; margin-bottom: 5px;'>🔐 台灣彩券539</h2>
+            <h2 style='color: #00FF41; margin-bottom: 5px;'>台灣彩券539</h2>
             <h2 style='color: #00FF41; margin-top: 0px;'>數據中心授權</h2>
         </div>
     """, unsafe_allow_html=True)
