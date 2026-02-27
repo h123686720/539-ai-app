@@ -11,15 +11,15 @@ now_cst = datetime.now(tz_cst)
 # 即時動態時間顯示
 dynamic_time_display = now_cst.strftime('%H:%M:%S')
 
-# 授權碼切換排程：2026/02/25 11:00:00
-switch_time = datetime(2026, 2, 25, 11, 0, 0, tzinfo=tz_cst)
+# 授權碼切換排程：2026/02/28 11:00:00
+switch_time = datetime(2026, 2, 28, 11, 0, 0, tzinfo=tz_cst)
 
 if now_cst >= switch_time:
-    CURRENT_PASSWORD = "145888" # 2/25 11:00 後的新密碼
+    CURRENT_PASSWORD = "165757" # 2/28 11:00 後的新密碼
     display_date = now_cst.strftime('%Y/%m/%d') # 切換後顯示當天日期
 else:
-    CURRENT_PASSWORD = "165757" # 目前使用的密碼 (2/24)
-    display_date = "2026/02/24" # 2/25 11:00 前固定顯示 2/24
+    CURRENT_PASSWORD = "13678"  # 2/28 11:00 前的密碼
+    display_date = "2026/02/27" # 2/28 11:00 前固定顯示 2/27
 
 # --- 2. 介面樣式設計 ---
 st.set_page_config(page_title="數據分析終端", layout="centered")
@@ -85,8 +85,8 @@ elif st.session_state["step"] == "result":
     st.write(f"生成時間: {dynamic_time_display}")
     
     # --- 號碼固定鎖定 ---
-    sv_display = "23, 25"       # 專車
-    jt_display = "16, 37, 38"   # 連碰
+    sv_display = "22, 23"       # 專車 (原要求專車改成 22, 23)
+    jt_display = "12, 24, 37"   # 連碰
 
     st.markdown(f"""
         <div class='res-box'>
