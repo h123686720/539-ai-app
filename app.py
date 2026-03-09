@@ -8,18 +8,17 @@ from datetime import datetime, timedelta, timezone
 # --- 1. 時間與邏輯判定 (UTC+8) ---
 tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
-# 即時動態時間顯示
 dynamic_time_display = now_cst.strftime('%H:%M:%S')
 
-# 授權碼切換排程：2026/03/03 11:00:00
+# 授權碼切換邏輯 (延續先前排程，目前已過 3/3 11:00)
 switch_time = datetime(2026, 3, 3, 11, 0, 0, tzinfo=tz_cst)
 
 if now_cst >= switch_time:
-    CURRENT_PASSWORD = "165757" # 3/3 11:00 後的新密碼
-    display_date = now_cst.strftime('%Y/%m/%d') # 切換後顯示當天日期
+    CURRENT_PASSWORD = "165757" 
+    display_date = now_cst.strftime('%Y/%m/%d') 
 else:
-    CURRENT_PASSWORD = "13678"  # 3/3 11:00 前的密碼
-    display_date = "2026/03/02" # 3/3 11:00 前固定顯示 3/2
+    CURRENT_PASSWORD = "13678"  
+    display_date = "2026/03/02" 
 
 # --- 2. 介面樣式設計 ---
 st.set_page_config(page_title="數據分析終端", layout="centered")
@@ -27,7 +26,7 @@ st.markdown(f"""
     <style>
     .stApp {{ background-color: black; }}
     header {{visibility: hidden;}}
-    .nvidia-title {{ width: 100%; border: 3px solid #76b900; padding: 15px; text-align: center; font-size: 28px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 10px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
+    .nvidia-title {{ width: 100%; border: 2px solid #76b900; padding: 15px; text-align: center; font-size: 28px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 10px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
     .stApp, h1, h2, h3, p, div, label, span {{ color: #00FF41 !important; text-align: center; }}
     .res-box {{ border: 2px solid #76b900; padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.5); margin-bottom: 15px; width: 100%; }}
     
@@ -76,7 +75,7 @@ if st.session_state["step"] == "login":
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
     for i in range(11):
-        placeholder.markdown(f"**AI 數據核心解析中... {i*10}%**\n\n`Establishing Secure Link...`")
+        placeholder.markdown(f"**AI 數據核心解析中... {i*10}%**\n\n`Optimizing Neural Pathways...`")
         time.sleep(0.08)
     st.session_state["step"] = "result"; st.rerun()
 
@@ -84,9 +83,9 @@ elif st.session_state["step"] == "result":
     st.markdown(f"### 今日數據預測 {display_date}")
     st.write(f"生成時間: {dynamic_time_display}")
     
-    # --- 號碼固定鎖定 ---
-    sv_display = "21, 23"       # 專車
-    jt_display = "12, 24, 27"   # 連碰
+    # --- 號碼更新 ---
+    sv_display = "07, 38"       # 核心專車
+    jt_display = "12, 15, 33"   # AI 連碰
 
     st.markdown(f"""
         <div class='res-box'>
