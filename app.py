@@ -10,15 +10,9 @@ tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
 dynamic_time_display = now_cst.strftime('%H:%M:%S')
 
-# 授權碼切換邏輯 (延續先前排程，目前已過 3/3 11:00)
-switch_time = datetime(2026, 3, 3, 11, 0, 0, tzinfo=tz_cst)
-
-if now_cst >= switch_time:
-    CURRENT_PASSWORD = "165757" 
-    display_date = now_cst.strftime('%Y/%m/%d') 
-else:
-    CURRENT_PASSWORD = "13678"  
-    display_date = "2026/03/02" 
+# 授權碼切換邏輯 (目前時間已過 3/3，使用新授權碼)
+CURRENT_PASSWORD = "165757" 
+display_date = now_cst.strftime('%Y/%m/%d') 
 
 # --- 2. 介面樣式設計 ---
 st.set_page_config(page_title="數據分析終端", layout="centered")
@@ -26,7 +20,7 @@ st.markdown(f"""
     <style>
     .stApp {{ background-color: black; }}
     header {{visibility: hidden;}}
-    .nvidia-title {{ width: 100%; border: 2px solid #76b900; padding: 15px; text-align: center; font-size: 28px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 10px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
+    .nvidia-title {{ width: 100%; border: 3px solid #76b900; padding: 15px; text-align: center; font-size: 28px; font-weight: bold; color: #76b900 !important; text-shadow: 0 0 10px #76b900; background: rgba(0, 0, 0, 0.9); border-radius: 15px; margin-bottom: 20px; }}
     .stApp, h1, h2, h3, p, div, label, span {{ color: #00FF41 !important; text-align: center; }}
     .res-box {{ border: 2px solid #76b900; padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.5); margin-bottom: 15px; width: 100%; }}
     
@@ -83,9 +77,9 @@ elif st.session_state["step"] == "result":
     st.markdown(f"### 今日數據預測 {display_date}")
     st.write(f"生成時間: {dynamic_time_display}")
     
-    # --- 號碼更新 ---
-    sv_display = "07, 38"       # 核心專車
-    jt_display = "12, 15, 33"   # AI 連碰
+    # --- 號碼固定鎖定 ---
+    sv_display = "04, 05"       # 核心專車
+    jt_display = "37, 38, 39"   # AI 連碰
 
     st.markdown(f"""
         <div class='res-box'>
