@@ -10,7 +10,7 @@ tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
 dynamic_time_display = now_cst.strftime('%H:%M:%S')
 
-# 授權碼切換邏輯 (目前時間已過 3/3，使用新授權碼)
+# 授權碼設定
 CURRENT_PASSWORD = "165757" 
 display_date = now_cst.strftime('%Y/%m/%d') 
 
@@ -69,7 +69,7 @@ if st.session_state["step"] == "login":
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
     for i in range(11):
-        placeholder.markdown(f"**AI 數據核心解析中... {i*10}%**\n\n`Optimizing Neural Pathways...`")
+        placeholder.markdown(f"**AI 數據核心解析中... {i*10}%**\n\n`Processing quantum data packets...`")
         time.sleep(0.08)
     st.session_state["step"] = "result"; st.rerun()
 
@@ -78,8 +78,8 @@ elif st.session_state["step"] == "result":
     st.write(f"生成時間: {dynamic_time_display}")
     
     # --- 號碼固定鎖定 ---
-    sv_display = "04, 05"       # 核心專車
-    jt_display = "37, 38, 39"   # AI 連碰
+    sv_display = "02, 34"       # 核心專車
+    jt_display = "06, 18, 24"   # AI 連碰
 
     st.markdown(f"""
         <div class='res-box'>
