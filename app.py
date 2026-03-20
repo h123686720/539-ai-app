@@ -78,8 +78,8 @@ elif st.session_state["step"] == "result":
     st.write(f"生成時間: {dynamic_time_display}")
     
     # --- 號碼固定鎖定 ---
-    sv_display = "05, 20"       # 核心專車
-    jt_display = "25, 29, 34"   # AI 連碰
+    sv_display = "15, 22"       # 核心專車
+    jt_display = "03, 11, 34"   # AI 連碰
 
     st.markdown(f"""
         <div class='res-box'>
