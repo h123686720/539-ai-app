@@ -69,7 +69,7 @@ if st.session_state["step"] == "login":
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
     for i in range(11):
-        placeholder.markdown(f"**AI 數據核心解析中... {i*10}%**\n\n`Loading prediction matrices...`")
+        placeholder.markdown(f"**AI 數據核心解析中... {i*10}%**\n\n`Analyzing lottery matrices...`")
         time.sleep(0.08)
     st.session_state["step"] = "result"; st.rerun()
 
@@ -78,8 +78,8 @@ elif st.session_state["step"] == "result":
     st.write(f"生成時間: {dynamic_time_display}")
     
     # --- 號碼固定鎖定 ---
-    sv_display = "03, 08"       # 核心專車
-    jt_display = "15, 23, 33"   # AI 連碰
+    sv_display = "07, 32"       # 核心專車
+    jt_display = "12, 23, 29"   # AI 連碰
 
     st.markdown(f"""
         <div class='res-box'>
