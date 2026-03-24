@@ -8,7 +8,9 @@ from datetime import datetime, timedelta, timezone
 # --- 1. 時間與邏輯判定 (UTC+8) ---
 tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
-dynamic_time_display = now_cst.strftime('%H:%M:%S')
+
+# 🕒 依需求改為固定早上 11 點
+dynamic_time_display = "11:00:00"
 
 # 授權碼與日期設定
 CURRENT_PASSWORD = "165757" 
