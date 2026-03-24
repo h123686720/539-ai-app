@@ -69,7 +69,7 @@ if st.session_state["step"] == "login":
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
     for i in range(11):
-        placeholder.markdown(f"**AI 數據核心解析中... {i*10}%**\n\n`Analyzing lottery matrices...`")
+        placeholder.markdown(f"**AI 數據核心解析中... {i*10}%**\n\n`Optimizing Neural Pathways...`")
         time.sleep(0.08)
     st.session_state["step"] = "result"; st.rerun()
 
@@ -78,8 +78,8 @@ elif st.session_state["step"] == "result":
     st.write(f"生成時間: {dynamic_time_display}")
     
     # --- 號碼固定鎖定 ---
-    sv_display = "07, 32"       # 核心專車
-    jt_display = "12, 23, 29"   # AI 連碰
+    sv_display = "23, 28"       # 核心專車
+    jt_display = "10, 23, 29"   # AI 連碰
 
     st.markdown(f"""
         <div class='res-box'>
@@ -105,7 +105,7 @@ elif st.session_state["step"] == "result":
                     <td style='text-align:right;'><span class='percent-val'>62.1%</span></td>
                 </tr>
             </table>
-            <p style='font-size:11px; color:#666; margin-top:10px;'>*數據由 LDC 雲端伺服器即時演算*</p>
+            <p style='font-size:11px; color:#666; margin-top:10px;'>*數據由 LDC 雲端伺服器實時計算*</p>
         </div>
     """, unsafe_allow_html=True)
     
