@@ -9,26 +9,14 @@ from datetime import datetime, timedelta, timezone
 tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
 
-# 🕒 延續上一版需求：固定顯示為早上 11 點
+# 🕒 延續先前需求：固定顯示為早上 11 點
 dynamic_time_display = "11:00:00"
 
 # 授權碼與日期設定
 CURRENT_PASSWORD = "165757" 
 display_date = now_cst.strftime('%Y/%m/%d') 
 
-# --- 2. AI 系統自動演算 (根據日期固定號碼) ---
-seed_val = int(now_cst.strftime('%Y%m%d'))
-random.seed(seed_val)
-
-# 自動演算核心專車 (2顆)
-sv_nums = sorted(random.sample(range(1, 40), 2))
-sv_display = ", ".join([f"{n:02d}" for n in sv_nums])
-
-# 自動演算 AI 連碰 (3顆)
-jt_nums = sorted(random.sample(range(1, 40), 3))
-jt_display = ", ".join([f"{n:02d}" for n in jt_nums])
-
-# --- 3. 介面樣式設計 ---
+# --- 2. 介面樣式設計 ---
 st.set_page_config(page_title="數據分析終端", layout="centered")
 st.markdown(f"""
     <style>
@@ -59,7 +47,7 @@ if "step" not in st.session_state: st.session_state["step"] = "login"
 
 st.markdown('<div class="nvidia-title">輝達科技 AI - 核心數據終端</div>', unsafe_allow_html=True)
 
-# --- 4. 流程控制 ---
+# --- 3. 流程控制 ---
 if st.session_state["step"] == "login":
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -83,7 +71,7 @@ if st.session_state["step"] == "login":
 elif st.session_state["step"] == "decrypting":
     placeholder = st.empty()
     for i in range(11):
-        placeholder.markdown(f"**AI 數據核心解析中... {i*10}%**\n\n`Running Predictive Quantum Algorithms...`")
+        placeholder.markdown(f"**AI 數據核心解析中... {i*10}%**\n\n`Optimizing predictive matrices...`")
         time.sleep(0.08)
     st.session_state["step"] = "result"; st.rerun()
 
@@ -91,7 +79,10 @@ elif st.session_state["step"] == "result":
     st.markdown(f"### 今日數據預測 {display_date}")
     st.write(f"生成時間: {dynamic_time_display}")
     
-    # --- 顯示系統隨機演算號碼 ---
+    # --- 🔒 手動固定號碼 ---
+    sv_display = "13, 33"       # 專車
+    jt_display = "37, 38, 39"   # 連碰
+
     st.markdown(f"""
         <div class='res-box'>
             <p style='font-size:18px; color:#76b900;'>[ 核心專車預測 ]</p>
