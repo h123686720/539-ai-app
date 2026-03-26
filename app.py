@@ -1,5 +1,5 @@
 import streamlit as st
-import pd
+import pandas as pd  # ✅ 修正這裡：正確導入 pandas
 import time
 import random
 import numpy as np
@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 tz_cst = timezone(timedelta(hours=8))
 now_cst = datetime.now(tz_cst)
 
-# 🕒 延續先前需求：固定顯示為早上 11 點
+# 🕒 延續需求：固定顯示為早上 11 點
 dynamic_time_display = "11:00:00"
 
 # 授權碼與日期設定
@@ -85,7 +85,7 @@ elif st.session_state["step"] == "decrypting":
     for i in range(11):
         placeholder.markdown(f"**AI 數據核心解析中... {i*10}%**\n\n`Initiating neural pattern sync...`")
         time.sleep(0.08)
-    st.session_state["step"] = "result"; rerun()
+    st.session_state["step"] = "result"; st.rerun()  # ✅ 修正這裡：補上 st.
 
 elif st.session_state["step"] == "result":
     st.markdown(f"### 今日數據預測 {display_date}")
@@ -99,7 +99,7 @@ elif st.session_state["step"] == "result":
         </div>
         <div class='res-box'>
             <p style='font-size:18px; color:#76b900;'>[ AI 連碰推薦 ]</p>
-            <h2 style='font-size:54px; color:#00FF41 !important; label-spacing: 5px;'>{jt_display}</h2>
+            <h2 style='font-size:54px; color:#00FF41 !important; letter-spacing: 5px;'>{jt_display}</h2>
         </div>
     """, unsafe_allow_html=True)
 
