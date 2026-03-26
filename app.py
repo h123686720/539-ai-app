@@ -1,5 +1,5 @@
 import streamlit as st
-import pandas as pd  # ✅ 保持修正後的正確導入
+import pandas as pd
 import time
 import random
 import numpy as np
@@ -80,8 +80,8 @@ elif st.session_state["step"] == "result":
     st.write(f"生成時間: {dynamic_time_display}")
     
     # --- 🔒 手動固定號碼 ---
-    sv_display = "06, 16"       # 專車
-    jt_display = "37, 38, 39"   # 連碰
+    sv_display = "04, 24"       # 專車
+    jt_display = "36, 37, 38"   # 連碰
 
     st.markdown(f"""
         <div class='res-box'>
